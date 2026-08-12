@@ -155,25 +155,8 @@ export function Header({
         </div>
       </div>
       <div className="flex items-center gap-2 sm:gap-5">
-        <div className="relative hidden sm:block">
-          <Search
-            className="absolute left-3 top-2.5 text-[#9aa69f]"
-            size={16}
-          />
-          <input
-            value={search}
-            onChange={(event) => onSearch(event.target.value)}
-            placeholder="Search cards..."
-            className="h-10 w-52 rounded-xl border border-[#e0e7e1] bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[#79ba93]"
-          />
-        </div>
         <button className="hidden items-center gap-2 rounded-xl border border-[#dce5de] bg-white px-3 py-2 text-sm font-semibold text-[#506159] transition hover:border-[#a9cdb4] sm:flex">
           Help
-        </button>
-        <button onClick={onAddCard} className="primary-button">
-          <Plus size={17} />
-          <span className="hidden sm:inline">New card</span>
-          <span className="sm:hidden">Add</span>
         </button>
         <button
           onClick={onLogout}
