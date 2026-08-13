@@ -10,6 +10,8 @@ import { ReviewView } from "@/components/ReviewView";
 import { AddCardModal } from "@/components/AddCardModal";
 import { AiGeneratorModal } from "@/components/AiGeneratorModal";
 import { CategoryModal } from "@/components/CategoryModal";
+import { LanguageCode } from "./common/constants/constants";
+import { EditCategoryModal } from "./components/EditCategoryModal";
 
 type View = "overview" | "cards" | "review";
 
@@ -20,6 +22,9 @@ export default function App() {
   const [showAdd, setShowAdd] = useState(false);
   const [showAiGenerator, setShowAiGenerator] = useState(false);
   const [showCategory, setShowCategory] = useState(false);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
+    null,
+  );
   const [mobileNav, setMobileNav] = useState(false);
   const [authenticated, setAuthenticated] = useState(
     authService.isAuthenticated(),
@@ -40,6 +45,7 @@ export default function App() {
     reviewCard,
     loadCardsByCategory,
     generateCardsFromAi,
+    updateCategory,
   } = useFlashcards(authenticated);
   const dueCards = cards.filter(
     (card) =>
@@ -89,6 +95,7 @@ export default function App() {
     setShowAdd(false);
     setView("cards");
   };
+
   const addCategory = async (
     name: string,
     sourceLanguage: string,
@@ -97,6 +104,20 @@ export default function App() {
     await createCategory(name, sourceLanguage, targetLanguage);
     setShowCategory(false);
   };
+
+  const saveCategory = async (
+    id: string,
+    data: {
+      name: string;
+      sourceLanguage: LanguageCode;
+      targetLanguage: LanguageCode;
+    },
+  ) => {
+    await updateCategory(id, data);
+    setEditingCategoryId(null);
+  };
+
+  const editingCategory = categories.find((c) => c.id === editingCategoryId);
 
   if (!authenticated) {
     return <AuthPage onAuthenticated={handleAuthenticated} />;
@@ -145,6 +166,7 @@ export default function App() {
               onCategory={handleCategoryChange}
               onAdd={() => setShowAdd(true)}
               onAddAi={() => setShowAiGenerator(true)}
+              onEditCategory={() => setEditingCategoryId(activeCategory)}
               onRate={reviewCard}
             />
           )}
@@ -176,6 +198,13 @@ export default function App() {
         <CategoryModal
           onClose={() => setShowCategory(false)}
           onAdd={addCategory}
+        />
+      )}
+      {editingCategory && (
+        <EditCategoryModal
+          category={editingCategory}
+          onClose={() => setEditingCategoryId(null)}
+          onSave={saveCategory}
         />
       )}
     </div>

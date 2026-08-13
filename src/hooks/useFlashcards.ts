@@ -141,5 +141,16 @@ export function useFlashcards(enabled = true) {
     return resp.skippedWords ?? [];
   };
 
-  return { categories, cards, categoryDueCounts, reviewStats, loading, error, reload: load, loadCardsByCategory, createCategory, createCard, reviewCard, generateCardsFromAi };
+  const updateCategory = async (
+    id: string,
+    data: { name: string; sourceLanguage: string; targetLanguage: string },
+  ) => {
+    const updated = await categoryService.update(id, data);
+    setCategories((current) =>
+      current.map((category) => (category.id === id ? updated : category)),
+    );
+    return updated;
+  };
+
+  return { categories, cards, categoryDueCounts, reviewStats, loading, error, reload: load, loadCardsByCategory, createCategory, createCard, reviewCard, generateCardsFromAi, updateCategory };
 }

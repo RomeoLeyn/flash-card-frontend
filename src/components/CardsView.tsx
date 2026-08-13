@@ -1,4 +1,4 @@
-import { Layers3, Plus, Sparkles } from "lucide-react";
+import { Layers3, Pencil, Plus, Sparkles } from "lucide-react";
 import type { Card, Category, ReviewQuality } from "@/types/flashcards";
 import { CardGrid } from "./CardGrid";
 import { CollectionStudy } from "./CollectionStudy";
@@ -10,6 +10,7 @@ type CardsViewProps = {
   onCategory: (id: string) => void;
   onAdd: () => void;
   onAddAi: () => void;
+  onEditCategory: () => void;
   onRate: (id: string, quality: ReviewQuality) => void;
 };
 
@@ -19,6 +20,7 @@ export function CardsView({
   activeCategory,
   onAdd,
   onAddAi,
+  onEditCategory,
   onRate,
 }: CardsViewProps) {
   const isStudyMode = activeCategory !== "all";
@@ -29,6 +31,19 @@ export function CardsView({
   return (
     <>
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-bold tracking-[-.03em]">
+            {activeCategoryName}
+          </h2>
+          <button
+            onClick={onEditCategory}
+            className="icon-button"
+            aria-label="Edit collection"
+          >
+            <Pencil size={15} />
+          </button>
+        </div>
+
         <div className="flex gap-3">
           <button onClick={onAdd} className="primary-button self-start">
             <Plus size={17} /> New card
