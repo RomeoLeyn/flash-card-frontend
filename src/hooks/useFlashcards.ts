@@ -3,6 +3,7 @@ import { cardService } from '@/services/cardService';
 import { categoryService } from '@/services/categoryService';
 import { reviewService } from '@/services/reviewService';
 import type { Card, Category, CreateCardInput, ReviewQuality, ReviewStats } from '@/types/flashcards';
+import { LanguageCode } from '@/common/constants/constants';
 
 function normalizeCard(card: any): Card {
   return {
@@ -143,7 +144,7 @@ export function useFlashcards(enabled = true) {
 
   const updateCategory = async (
     id: string,
-    data: { name: string; sourceLanguage: string; targetLanguage: string },
+    data: { name: string; sourceLanguage: LanguageCode; targetLanguage: LanguageCode },
   ) => {
     const updated = await categoryService.update(id, data);
     setCategories((current) =>
