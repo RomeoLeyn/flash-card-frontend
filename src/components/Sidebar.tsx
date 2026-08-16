@@ -19,7 +19,7 @@ type SidebarProps = {
   activeCategory: string;
   dueCount: number;
   mobileNav: boolean;
-  onNavigate: (view: "overview" | "cards" | "review") => void;
+  onNavigate: (view: "overview" | "cards" | "review" | "profile") => void;
   onSelectCategory: (id: string) => void;
   onAddCategory: () => void;
   onCloseMobile: () => void;
@@ -97,7 +97,13 @@ export function Sidebar({
             ))}
           </div>
         </div>
-        <div className="mt-5 flex items-center gap-3 border-t border-[#e5eae5] pt-5">
+        <button
+          onClick={() => {
+            onNavigate("profile");
+            onCloseMobile();
+          }}
+          className="mt-5 flex items-center gap-3 border-t border-[#e5eae5] pt-5 text-left transition hover:opacity-80"
+        >
           <div className="avatar">AM</div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">
@@ -106,7 +112,7 @@ export function Sidebar({
             <p className="text-xs text-[#91a098]">Free workspace</p>
           </div>
           <Settings2 className="ml-auto text-[#9ba7a0]" size={17} />
-        </div>
+        </button>
       </aside>
       {mobileNav && (
         <button

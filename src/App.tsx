@@ -12,8 +12,10 @@ import { AiGeneratorModal } from "@/components/AiGeneratorModal";
 import { CategoryModal } from "@/components/CategoryModal";
 import { LanguageCode } from "./common/constants/constants";
 import { EditCategoryModal } from "./components/EditCategoryModal";
+import { ProfilePage } from "./pages/ProfilePage";
+import { userService } from "./services/userService";
 
-type View = "overview" | "cards" | "review";
+type View = "overview" | "cards" | "review" | "profile";
 
 export default function App() {
   const [view, setView] = useState<View>("overview");
@@ -117,6 +119,21 @@ export default function App() {
     setEditingCategoryId(null);
   };
 
+  const handleUpdateProfile = async (data: {
+    email?: string;
+    password?: string;
+  }) => {
+    const updated = await userService.update(data);
+    setUser(updated);
+  };
+
+  const handleChangePassword = async (data: {
+    currentPassword: string;
+    newPassword: string;
+  }) => {
+    await userService.changePassword(data);
+  };
+
   const editingCategory = categories.find((c) => c.id === editingCategoryId);
 
   if (!authenticated) {
@@ -174,6 +191,17 @@ export default function App() {
             <ReviewView
               cards={dueCards.length ? dueCards : cards.slice(0, 3)}
               onComplete={reviewCard}
+            />
+          )}
+          {view === "profile" && (
+            <ProfilePage
+              user={user}
+              cards={cards}
+              categories={categories}
+              reviewStats={reviewStats ?? undefined}
+              onUpdateProfile={handleUpdateProfile}
+              onChangePassword={handleChangePassword}
+              onLogout={handleLogout}
             />
           )}
         </div>
