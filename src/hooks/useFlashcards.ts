@@ -1,26 +1,33 @@
-import { useCallback, useEffect, useState } from 'react';
-import { cardService } from '@/services/cardService';
-import { categoryService } from '@/services/categoryService';
-import { reviewService } from '@/services/reviewService';
-import type { Card, Category, CreateCardInput, ReviewQuality, ReviewStats } from '@/types/flashcards';
-import { LanguageCode } from '@/common/constants/constants';
+import { useCallback, useEffect, useState } from "react";
+import { cardService } from "@/services/cardService";
+import { categoryService } from "@/services/categoryService";
+import { reviewService } from "@/services/reviewService";
+import type {
+  Card,
+  Category,
+  CreateCardInput,
+  ReviewQuality,
+  ReviewStats,
+  UpdateCardInput,
+} from "@/types/flashcards";
+import { LanguageCode } from "@/common/constants/constants";
 
 function normalizeCard(card: any): Card {
   return {
     ...card,
-    categoryId: card.category?.id ?? card.categoryId ?? '',
+    categoryId: card.category?.id ?? card.categoryId ?? "",
     nextReviewDate:
-      typeof card.nextReviewDate === 'string'
+      typeof card.nextReviewDate === "string"
         ? card.nextReviewDate
         : card.nextReviewDate instanceof Date
           ? card.nextReviewDate.toISOString()
-          : card.nextReviewDate ?? null,
+          : (card.nextReviewDate ?? null),
     lastReviewedAt:
-      typeof card.lastReviewedAt === 'string'
+      typeof card.lastReviewedAt === "string"
         ? card.lastReviewedAt
         : card.lastReviewedAt instanceof Date
           ? card.lastReviewedAt.toISOString()
-          : card.lastReviewedAt ?? null,
+          : (card.lastReviewedAt ?? null),
   };
 }
 
@@ -31,7 +38,9 @@ function normalizeCards(cards: any[]): Card[] {
 export function useFlashcards(enabled = true) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
-  const [categoryDueCounts, setCategoryDueCounts] = useState<Record<string, number>>({});
+  const [categoryDueCounts, setCategoryDueCounts] = useState<
+    Record<string, number>
+  >({});
   const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
@@ -42,18 +51,34 @@ export function useFlashcards(enabled = true) {
     setError(null);
     try {
       const loadedCategories = await categoryService.list();
-      const categoriesWithAll = [{ id: 'all', name: 'All cards', sourceLanguage: '', targetLanguage: '', createdAt: '' }, ...loadedCategories];
+      const categoriesWithAll = [
+        {
+          id: "all",
+          name: "All cards",
+          sourceLanguage: "",
+          targetLanguage: "",
+          createdAt: "",
+        },
+        ...loadedCategories,
+      ];
       setCategories(categoriesWithAll);
 
       const [allDueCards, ...categoryResponses] = await Promise.all([
         cardService.listDue(undefined, 1000),
-        ...loadedCategories.map((category) => cardService.listDue(category.id, 1000)),
+        ...loadedCategories.map((category) =>
+          cardService.listDue(category.id, 1000),
+        ),
       ]);
 
       const normalizedAllCards = normalizeCards(allDueCards);
-      const normalizedCategoryResponses = categoryResponses.map((response) => normalizeCards(response));
+      const normalizedCategoryResponses = categoryResponses.map((response) =>
+        normalizeCards(response),
+      );
       const nextCounts = Object.fromEntries(
-        loadedCategories.map((category, index) => [category.id, normalizedCategoryResponses[index].length]),
+        loadedCategories.map((category, index) => [
+          category.id,
+          normalizedCategoryResponses[index].length,
+        ]),
       );
 
       setCards(normalizedAllCards);
@@ -73,26 +98,35 @@ export function useFlashcards(enabled = true) {
         // ignore stats errors — non-critical
       }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not load your cards.');
+      setError(
+        cause instanceof Error ? cause.message : "Could not load your cards.",
+      );
     } finally {
       setLoading(false);
     }
   }, [enabled]);
 
-  const loadCardsByCategory = useCallback(async (categoryId: string) => {
-    if (!enabled) return;
-    setLoading(true);
-    setError(null);
+  const loadCardsByCategory = useCallback(
+    async (categoryId: string) => {
+      if (!enabled) return;
+      setLoading(true);
+      setError(null);
 
-    try {
-      const categoryCards = await cardService.listDue(categoryId);
-      setCards(normalizeCards(categoryCards));
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not load cards for this category.');
-    } finally {
-      setLoading(false);
-    }
-  }, [categories, enabled]);
+      try {
+        const categoryCards = await cardService.listDue(categoryId);
+        setCards(normalizeCards(categoryCards));
+      } catch (cause) {
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Could not load cards for this category.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [categories, enabled],
+  );
 
   useEffect(() => {
     if (!enabled) return;
@@ -104,7 +138,11 @@ export function useFlashcards(enabled = true) {
     sourceLanguage: string,
     targetLanguage: string,
   ) => {
-    const category = await categoryService.create(name, sourceLanguage, targetLanguage);
+    const category = await categoryService.create(
+      name,
+      sourceLanguage,
+      targetLanguage,
+    );
     setCategories((current) => [...current, category]);
     return category;
   };
@@ -115,14 +153,24 @@ export function useFlashcards(enabled = true) {
     return card;
   };
 
+  const updateCard = async (id: string, input: UpdateCardInput) => {
+    const updated = await cardService.update(id, input);
+    const normalized = normalizeCard(updated);
+    setCards((current) => current.map((c) => (c.id === id ? normalized : c)));
+    return normalized;
+  };
+
   const reviewCard = async (id: string, quality: ReviewQuality) => {
     const updated = await reviewService.submit(id, quality);
-    setCards((current) => current.map((card) => card.id === id ? updated : card));
+    setCards((current) =>
+      current.map((card) => (card.id === id ? updated : card)),
+    );
     setCategoryDueCounts((current) => {
       if (!updated.categoryId) return current;
       const next = { ...current };
-      if (typeof next[updated.categoryId] === 'number') next[updated.categoryId] = Math.max(0, next[updated.categoryId] - 1);
-      if (typeof next.all === 'number') next.all = Math.max(0, next.all - 1);
+      if (typeof next[updated.categoryId] === "number")
+        next[updated.categoryId] = Math.max(0, next[updated.categoryId] - 1);
+      if (typeof next.all === "number") next.all = Math.max(0, next.all - 1);
       return next;
     });
   };
@@ -134,8 +182,9 @@ export function useFlashcards(enabled = true) {
     setCards((current) => [...normalizedGenerated, ...current]);
     setCategoryDueCounts((current) => {
       const next = { ...current };
-      if (typeof next[categoryId] === 'number') next[categoryId] += normalizedGenerated.length;
-      if (typeof next.all === 'number') next.all += normalizedGenerated.length;
+      if (typeof next[categoryId] === "number")
+        next[categoryId] += normalizedGenerated.length;
+      if (typeof next.all === "number") next.all += normalizedGenerated.length;
       return next;
     });
 
@@ -144,7 +193,11 @@ export function useFlashcards(enabled = true) {
 
   const updateCategory = async (
     id: string,
-    data: { name: string; sourceLanguage: LanguageCode; targetLanguage: LanguageCode },
+    data: {
+      name: string;
+      sourceLanguage: LanguageCode;
+      targetLanguage: LanguageCode;
+    },
   ) => {
     const updated = await categoryService.update(id, data);
     setCategories((current) =>
@@ -153,5 +206,26 @@ export function useFlashcards(enabled = true) {
     return updated;
   };
 
-  return { categories, cards, categoryDueCounts, reviewStats, loading, error, reload: load, loadCardsByCategory, createCategory, createCard, reviewCard, generateCardsFromAi, updateCategory };
+  const deleteCard = async (id: string) => {
+    await cardService.remove(id);
+    setCards((current) => current.filter((c) => c.id !== id));
+  };
+
+  return {
+    categories,
+    cards,
+    categoryDueCounts,
+    reviewStats,
+    loading,
+    error,
+    reload: load,
+    loadCardsByCategory,
+    createCategory,
+    createCard,
+    updateCard,
+    deleteCard,
+    reviewCard,
+    generateCardsFromAi,
+    updateCategory,
+  };
 }

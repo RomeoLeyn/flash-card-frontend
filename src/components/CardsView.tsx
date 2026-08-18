@@ -1,4 +1,5 @@
-import { Layers3, Pencil, Plus, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { Layers3, LayoutGrid, Pencil, Plus, Sparkles } from "lucide-react";
 import type { Card, Category, ReviewQuality } from "@/types/flashcards";
 import { CardGrid } from "./CardGrid";
 import { CollectionStudy } from "./CollectionStudy";
@@ -11,6 +12,8 @@ type CardsViewProps = {
   onAdd: () => void;
   onAddAi: () => void;
   onEditCategory: () => void;
+  onEditCard: (card: Card) => void;
+  onDeleteCard: (id: string) => Promise<void> | void;
   onRate: (id: string, quality: ReviewQuality) => void;
 };
 
@@ -21,12 +24,17 @@ export function CardsView({
   onAdd,
   onAddAi,
   onEditCategory,
+  onEditCard,
+  onDeleteCard,
   onRate,
 }: CardsViewProps) {
   const isStudyMode = activeCategory !== "all";
+  const [browseMode, setBrowseMode] = useState(false);
   const activeCategoryName =
     categories.find((category) => category.id === activeCategory)?.name ??
     "Collection";
+
+  const showGrid = !isStudyMode || browseMode;
 
   return (
     <>
@@ -35,16 +43,34 @@ export function CardsView({
           <h2 className="text-xl font-bold tracking-[-.03em]">
             {activeCategoryName}
           </h2>
-          <button
-            onClick={onEditCategory}
-            className="icon-button"
-            aria-label="Edit collection"
-          >
-            <Pencil size={15} />
-          </button>
+          {isStudyMode && (
+            <button
+              onClick={onEditCategory}
+              className="icon-button"
+              aria-label="Edit collection"
+            >
+              <Pencil size={15} />
+            </button>
+          )}
         </div>
 
         <div className="flex gap-3">
+          {isStudyMode && cards.length > 0 && (
+            <button
+              onClick={() => setBrowseMode((prev) => !prev)}
+              className="secondary-button self-start"
+            >
+              {browseMode ? (
+                <>
+                  <Layers3 size={16} /> Study mode
+                </>
+              ) : (
+                <>
+                  <LayoutGrid size={16} /> Browse all
+                </>
+              )}
+            </button>
+          )}
           <button onClick={onAdd} className="primary-button self-start">
             <Plus size={17} /> New card
           </button>
@@ -67,15 +93,15 @@ export function CardsView({
             Add your first card to start building this collection.
           </p>
         </div>
-      ) : isStudyMode ? (
+      ) : showGrid ? (
+        <CardGrid cards={cards} onEdit={onEditCard} onDelete={onDeleteCard} />
+      ) : (
         <CollectionStudy
           cards={cards}
           categoryName={activeCategoryName}
           onRate={onRate}
           onAdd={onAdd}
         />
-      ) : (
-        <CardGrid cards={cards} />
       )}
     </>
   );

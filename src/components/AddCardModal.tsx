@@ -1,45 +1,80 @@
-import { useState } from "react";
-import { Plus, Sparkles } from "lucide-react";
-import type { Category, CreateCardInput } from "@/types/flashcards";
+import { useEffect, useState } from "react";
+import { Pencil, Plus, Sparkles } from "lucide-react";
+import type {
+  Card,
+  Category,
+  CreateCardInput,
+  UpdateCardInput,
+} from "@/types/flashcards";
 import { Modal } from "./Modal";
 
 type AddCardModalProps = {
   categories: Category[];
   activeCategory?: string;
+  card?: Card;
   onClose: () => void;
   onAdd: (input: CreateCardInput) => void;
+  onSave?: (id: string, input: UpdateCardInput) => void;
 };
 
 export function AddCardModal({
   categories,
   activeCategory,
+  card,
   onClose,
   onAdd,
+  onSave,
 }: AddCardModalProps) {
-  const [word, setWord] = useState("");
-  const [translation, setTranslation] = useState("");
-  const [explanation, setExplanation] = useState("");
+  const isEditing = !!card;
+
+  const [word, setWord] = useState(card?.word ?? "");
+  const [translation, setTranslation] = useState(card?.translation ?? "");
+  const [explanation, setExplanation] = useState(card?.explanation ?? "");
   const [categoryId, setCategoryId] = useState(
-    (activeCategory || categories[0]?.id) ?? "daily",
+    card?.categoryId ?? (activeCategory || categories[0]?.id) ?? "daily",
   );
+
+  useEffect(() => {
+    if (!card) return;
+    setWord(card.word);
+    setTranslation(card.translation);
+    setExplanation(card.explanation ?? "");
+    setCategoryId(card.categoryId);
+  }, [card]);
+
+  const selectedCategory = categories.find((c) => c.id === categoryId);
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     if (!word.trim() || !translation.trim()) return;
-    onAdd({
-      word: word.trim(),
-      sourceLanguage: "English",
-      targetLanguage: "Ukrainian",
-      translation: translation.trim(),
-      explanation: explanation.trim() || undefined,
-      categoryId,
-    });
+
+    if (isEditing) {
+      onSave!(card.id, {
+        word: word.trim(),
+        translation: translation.trim(),
+        explanation: explanation.trim() || undefined,
+        categoryId,
+      });
+    } else {
+      onAdd({
+        word: word.trim(),
+        sourceLanguage: selectedCategory?.sourceLanguage ?? "en",
+        targetLanguage: selectedCategory?.targetLanguage ?? "uk",
+        translation: translation.trim(),
+        explanation: explanation.trim() || undefined,
+        categoryId,
+      });
+    }
   };
 
   return (
     <Modal
-      title="Create a new card"
-      subtitle="Capture a word now, make it stick later."
+      title={isEditing ? "Edit card" : "Create a new card"}
+      subtitle={
+        isEditing
+          ? "Update the word and its translation."
+          : "Capture a word now, make it stick later."
+      }
       onClose={onClose}
     >
       <form onSubmit={submit} className="space-y-4">
@@ -91,19 +126,29 @@ export function AddCardModal({
             className="field-input resize-none"
           />
         </label>
-        <div className="ai-hint">
-          <Sparkles size={17} />
-          <span>
-            AI suggestions will appear here when connected to your NestJS
-            service.
-          </span>
-        </div>
+        {!isEditing && (
+          <div className="ai-hint">
+            <Sparkles size={17} />
+            <span>
+              AI suggestions will appear here when connected to your NestJS
+              service.
+            </span>
+          </div>
+        )}
         <div className="flex justify-end gap-3 pt-3">
           <button type="button" onClick={onClose} className="secondary-button">
             Cancel
           </button>
           <button className="primary-button" type="submit">
-            <Plus size={17} /> Create card
+            {isEditing ? (
+              <>
+                <Pencil size={17} /> Save changes
+              </>
+            ) : (
+              <>
+                <Plus size={17} /> Create card
+              </>
+            )}
           </button>
         </div>
       </form>

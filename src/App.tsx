@@ -2,7 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { authService } from "@/services/authService";
 import { useFlashcards } from "@/hooks/useFlashcards";
 import { AuthPage } from "@/components/AuthPage";
-import type { CreateCardInput, ReviewQuality } from "@/types/flashcards";
+import type {
+  Card,
+  CreateCardInput,
+  ReviewQuality,
+  UpdateCardInput,
+} from "@/types/flashcards";
 import { Sidebar, Header } from "@/components/Sidebar";
 import { Overview } from "@/components/Overview";
 import { CardsView } from "@/components/CardsView";
@@ -31,6 +36,7 @@ export default function App() {
   const [authenticated, setAuthenticated] = useState(
     authService.isAuthenticated(),
   );
+  const [editingCard, setEditingCard] = useState<Card | null>(null);
   const [user, setUser] = useState<{
     id: string;
     email: string;
@@ -44,6 +50,8 @@ export default function App() {
     reviewStats,
     createCategory,
     createCard,
+    updateCard,
+    deleteCard,
     reviewCard,
     loadCardsByCategory,
     generateCardsFromAi,
@@ -96,6 +104,11 @@ export default function App() {
     await createCard(input);
     setShowAdd(false);
     setView("cards");
+  };
+
+  const saveCard = async (id: string, input: UpdateCardInput) => {
+    await updateCard(id, input);
+    setEditingCard(null);
   };
 
   const addCategory = async (
@@ -184,6 +197,8 @@ export default function App() {
               onAdd={() => setShowAdd(true)}
               onAddAi={() => setShowAiGenerator(true)}
               onEditCategory={() => setEditingCategoryId(activeCategory)}
+              onEditCard={setEditingCard}
+              onDeleteCard={deleteCard}
               onRate={reviewCard}
             />
           )}
@@ -212,6 +227,15 @@ export default function App() {
           activeCategory={activeCategory}
           onClose={() => setShowAdd(false)}
           onAdd={addCard}
+        />
+      )}
+      {editingCard && (
+        <AddCardModal
+          categories={categories.slice(1)}
+          card={editingCard}
+          onClose={() => setEditingCard(null)}
+          onAdd={addCard}
+          onSave={saveCard}
         />
       )}
       {showAiGenerator && (
