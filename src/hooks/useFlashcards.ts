@@ -45,6 +45,12 @@ export function useFlashcards(enabled = true) {
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
+  const [browsedCards, setBrowsedCards] = useState<Card[]>([]);
+  const [browsedCategoryId, setBrowsedCategoryId] = useState<string | null>(
+    null,
+  );
+  const [browseLoading, setBrowseLoading] = useState(false);
+
   const load = useCallback(async () => {
     if (!enabled) return;
     setLoading(true);
@@ -105,6 +111,22 @@ export function useFlashcards(enabled = true) {
       setLoading(false);
     }
   }, [enabled]);
+
+  const loadAllCardsByCategory = useCallback(async (categoryId: string) => {
+    setBrowseLoading(true);
+    setError(null);
+    try {
+      const categoryCards = await cardService.getCardsByCategoryId(categoryId);
+      setBrowsedCards(normalizeCards(categoryCards));
+      setBrowsedCategoryId(categoryId);
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not load all cards.",
+      );
+    } finally {
+      setBrowseLoading(false);
+    }
+  }, []);
 
   const loadCardsByCategory = useCallback(
     async (categoryId: string) => {
@@ -191,6 +213,11 @@ export function useFlashcards(enabled = true) {
     return resp.skippedWords ?? [];
   };
 
+  const getCardsByCategoryId = async (categoryId: string) => {
+    const categoryCards = await cardService.getCardsByCategoryId(categoryId);
+    return normalizeCards(categoryCards);
+  };
+
   const updateCategory = async (
     id: string,
     data: {
@@ -222,10 +249,15 @@ export function useFlashcards(enabled = true) {
     loadCardsByCategory,
     createCategory,
     createCard,
+    getCardsByCategoryId,
     updateCard,
     deleteCard,
     reviewCard,
     generateCardsFromAi,
     updateCategory,
+    browsedCards,
+    browsedCategoryId,
+    browseLoading,
+    loadAllCardsByCategory,
   };
 }

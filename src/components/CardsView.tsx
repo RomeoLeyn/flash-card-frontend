@@ -15,6 +15,10 @@ type CardsViewProps = {
   onEditCard: (card: Card) => void;
   onDeleteCard: (id: string) => Promise<void> | void;
   onRate: (id: string, quality: ReviewQuality) => void;
+  browseMode: boolean;
+  browseLoading: boolean;
+  onBrowseAll: () => void;
+  onStudyMode: () => void;
 };
 
 export function CardsView({
@@ -27,9 +31,13 @@ export function CardsView({
   onEditCard,
   onDeleteCard,
   onRate,
+  browseMode,
+  browseLoading,
+  onBrowseAll,
+  onStudyMode,
 }: CardsViewProps) {
   const isStudyMode = activeCategory !== "all";
-  const [browseMode, setBrowseMode] = useState(false);
+  // const [browseMode, setBrowseMode] = useState(false);
   const activeCategoryName =
     categories.find((category) => category.id === activeCategory)?.name ??
     "Collection";
@@ -56,8 +64,22 @@ export function CardsView({
 
         <div className="flex gap-3">
           {isStudyMode && cards.length > 0 && (
+            // <button
+            //   onClick={() => setBrowseMode((prev) => !prev)}
+            //   className="secondary-button self-start"
+            // >
+            //   {browseMode ? (
+            //     <>
+            //       <Layers3 size={16} /> Study mode
+            //     </>
+            //   ) : (
+            //     <>
+            //       <LayoutGrid size={16} /> Browse all
+            //     </>
+            //   )}
+            // </button>
             <button
-              onClick={() => setBrowseMode((prev) => !prev)}
+              onClick={browseMode ? onStudyMode : onBrowseAll}
               className="secondary-button self-start"
             >
               {browseMode ? (

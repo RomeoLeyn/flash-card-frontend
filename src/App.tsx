@@ -42,6 +42,7 @@ export default function App() {
     email: string;
     createdAt: string;
   } | null>(null);
+  const [browseMode, setBrowseMode] = useState(false);
 
   const {
     categories,
@@ -56,19 +57,34 @@ export default function App() {
     loadCardsByCategory,
     generateCardsFromAi,
     updateCategory,
+    browsedCards,
+    browseLoading,
+    loadAllCardsByCategory,
   } = useFlashcards(authenticated);
   const dueCards = cards.filter(
     (card) =>
       card.nextReviewDate && new Date(card.nextReviewDate) <= new Date(),
   );
+  // const visibleCards = useMemo(
+  //   () =>
+  //     cards.filter((card) =>
+  //       `${card.word} ${card.translation}`
+  //         .toLowerCase()
+  //         .includes(search.toLowerCase()),
+  //     ),
+  //   [cards, search],
+  // );
+
+  const sourceCards = browseMode ? browsedCards : cards;
+
   const visibleCards = useMemo(
     () =>
-      cards.filter((card) =>
+      sourceCards.filter((card) =>
         `${card.word} ${card.translation}`
           .toLowerCase()
           .includes(search.toLowerCase()),
       ),
-    [cards, search],
+    [sourceCards, search],
   );
 
   const handleAuthenticated = () => setAuthenticated(true);
@@ -96,8 +112,15 @@ export default function App() {
 
   const handleCategoryChange = async (categoryId: string) => {
     setActiveCategory(categoryId);
+    setBrowseMode(false);
     setView("cards");
     await loadCardsByCategory(categoryId);
+  };
+
+  const handleBrowseAll = async (categoryId: string) => {
+    setBrowseMode(true);
+    setView("cards");
+    await loadAllCardsByCategory(categoryId);
   };
 
   const addCard = async (input: CreateCardInput) => {
@@ -200,6 +223,10 @@ export default function App() {
               onEditCard={setEditingCard}
               onDeleteCard={deleteCard}
               onRate={reviewCard}
+              browseMode={browseMode}
+              browseLoading={browseLoading}
+              onBrowseAll={() => handleBrowseAll(activeCategory)}
+              onStudyMode={() => setBrowseMode(false)}
             />
           )}
           {view === "review" && (
