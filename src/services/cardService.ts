@@ -7,7 +7,7 @@ import type {
 
 export const cardService = {
   create: (input: CreateCardInput) => http<Card>("/cards", json(input)),
-  listDue: (categoryId?: string, limit = 20) => {
+  listDue: (categoryId?: string, limit: number = 20) => {
     const params = new URLSearchParams({ limit: String(limit) });
     if (categoryId && categoryId !== "all")
       params.set("categoryId", categoryId);

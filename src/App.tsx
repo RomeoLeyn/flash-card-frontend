@@ -57,6 +57,7 @@ export default function App() {
     loadCardsByCategory,
     generateCardsFromAi,
     updateCategory,
+    deleteCategory,
     browsedCards,
     browseLoading,
     loadAllCardsByCategory,
@@ -65,15 +66,6 @@ export default function App() {
     (card) =>
       card.nextReviewDate && new Date(card.nextReviewDate) <= new Date(),
   );
-  // const visibleCards = useMemo(
-  //   () =>
-  //     cards.filter((card) =>
-  //       `${card.word} ${card.translation}`
-  //         .toLowerCase()
-  //         .includes(search.toLowerCase()),
-  //     ),
-  //   [cards, search],
-  // );
 
   const sourceCards = browseMode ? browsedCards : cards;
 
@@ -115,6 +107,16 @@ export default function App() {
     setBrowseMode(false);
     setView("cards");
     await loadCardsByCategory(categoryId);
+  };
+
+  const removeCategory = async (id: string) => {
+    await deleteCategory(id);
+    setEditingCategoryId(null);
+    if (activeCategory === id) {
+      setActiveCategory("all");
+      setView("cards");
+      await loadCardsByCategory("all");
+    }
   };
 
   const handleBrowseAll = async (categoryId: string) => {
@@ -284,6 +286,7 @@ export default function App() {
           category={editingCategory}
           onClose={() => setEditingCategoryId(null)}
           onSave={saveCategory}
+          onDelete={removeCategory}
         />
       )}
     </div>

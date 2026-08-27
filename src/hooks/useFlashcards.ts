@@ -233,6 +233,17 @@ export function useFlashcards(enabled = true) {
     return updated;
   };
 
+  const deleteCategory = async (id: string) => {
+    await categoryService.remove(id);
+    setCategories((current) => current.filter((c) => c.id !== id));
+    setCards((current) => current.filter((c) => c.categoryId !== id));
+    setCategoryDueCounts((current) => {
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
+  };
+
   const deleteCard = async (id: string) => {
     await cardService.remove(id);
     setCards((current) => current.filter((c) => c.id !== id));
@@ -255,6 +266,7 @@ export function useFlashcards(enabled = true) {
     reviewCard,
     generateCardsFromAi,
     updateCategory,
+    deleteCategory,
     browsedCards,
     browsedCategoryId,
     browseLoading,

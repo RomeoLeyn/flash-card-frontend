@@ -37,7 +37,6 @@ export function CardsView({
   onStudyMode,
 }: CardsViewProps) {
   const isStudyMode = activeCategory !== "all";
-  // const [browseMode, setBrowseMode] = useState(false);
   const activeCategoryName =
     categories.find((category) => category.id === activeCategory)?.name ??
     "Collection";
@@ -64,20 +63,6 @@ export function CardsView({
 
         <div className="flex gap-3">
           {isStudyMode && cards.length > 0 && (
-            // <button
-            //   onClick={() => setBrowseMode((prev) => !prev)}
-            //   className="secondary-button self-start"
-            // >
-            //   {browseMode ? (
-            //     <>
-            //       <Layers3 size={16} /> Study mode
-            //     </>
-            //   ) : (
-            //     <>
-            //       <LayoutGrid size={16} /> Browse all
-            //     </>
-            //   )}
-            // </button>
             <button
               onClick={browseMode ? onStudyMode : onBrowseAll}
               className="secondary-button self-start"
