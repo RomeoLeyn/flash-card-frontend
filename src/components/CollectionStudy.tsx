@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Check, Plus, RotateCcw, Sparkles } from "lucide-react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { Check, ChevronDown, Plus, RotateCcw, Sparkles } from "lucide-react";
 import type { Card, ReviewQuality } from "@/types/flashcards";
 
 type CollectionStudyProps = {
@@ -19,6 +19,14 @@ export function CollectionStudy({
   const [flipped, setFlipped] = useState(false);
   const [finished, setFinished] = useState(false);
   const card = cards[index];
+  const [explanationExpanded, setExplanationExpanded] = useState(false);
+
+  const explanationRef = useRef<HTMLParagraphElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  const measureRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLDivElement>(null);
+  const [cardHeight, setCardHeight] = useState(280);
 
   const pendingTimeout = useRef<number | null>(null);
 
@@ -56,6 +64,7 @@ export function CollectionStudy({
   const choose = (quality: ReviewQuality) => {
     onRate(card.id, quality);
     setFlipped(false);
+    setExplanationExpanded(false);
     const timeout = window.setTimeout(() => {
       if (index + 1 < cards.length) {
         setIndex((current) => current + 1);
@@ -74,6 +83,31 @@ export function CollectionStudy({
       }
     };
   }, []);
+
+  useEffect(() => {
+    const el = explanationRef.current;
+
+    if (!el) return;
+
+    setIsOverflowing(el.scrollHeight > el.clientHeight);
+  }, [card, flipped, explanationExpanded]);
+
+  useLayoutEffect(() => {
+    if (!backRef.current) return;
+
+    setCardHeight(Math.max(280, backRef.current.scrollHeight));
+  }, [card, flipped, explanationExpanded]);
+
+  useEffect(() => {
+    if (!flipped) {
+      setExplanationExpanded(false);
+    }
+  }, [flipped]);
+
+  useLayoutEffect(() => {
+    if (!measureRef.current) return;
+    setCardHeight(Math.max(280, measureRef.current.scrollHeight));
+  }, [card, explanationExpanded]);
 
   return (
     <div className="mx-auto max-w-[760px]">
@@ -98,14 +132,75 @@ export function CollectionStudy({
           style={{ width: `${((index + 1) / cards.length) * 100}%` }}
         />
       </div>
+
+      {/*
+      Hidden "measurer" for the real height of the card's back side.
+      Why it's needed: .card-face has height: 100% (so both sides of
+      the 3D-flip card can stack on top of each other), which means
+      measuring scrollHeight on an element INSIDE the card is useless —
+      it's always capped by the parent's height (cardHeight), which is
+      exactly the value we're trying to calculate. A circular dependency.
+
+      The fix: render an exact copy of the back-side content separately,
+      taken out of the document flow (position: absolute) and with no
+      height constraint (height: auto, visibility: hidden — it still
+      takes up layout space, but stays invisible and ignores clicks).
+      This element's scrollHeight reflects the content's true height,
+      and that's the value we feed into cardHeight for the real card.
+      */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none invisible absolute w-full max-w-[760px] rounded-2xl p-6 sm:p-8"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          visibility: "hidden",
+          height: "auto",
+        }}
+        ref={measureRef}
+      >
+        <div className="flex items-start justify-between">
+          <span className="rounded-full bg-white/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[.13em] text-[#508566]">
+            Translation
+          </span>
+          <Check size={17} className="text-[#4a9b6e]" />
+        </div>
+        <div className="mt-8 flex min-h-[140px] flex-col justify-center">
+          <p className="text-center text-4xl font-bold tracking-[-.06em] sm:text-5xl">
+            {card.translation}
+          </p>
+          {card.explanation && (
+            <div className="mx-auto mt-4 max-w-md">
+              <p
+                className={`text-center text-sm leading-6 text-[#65806e] ${
+                  explanationExpanded ? "" : "line-clamp-3"
+                }`}
+              >
+                {card.explanation}
+              </p>
+              {(isOverflowing || explanationExpanded) && (
+                <p className="mx-auto mt-1.5 flex items-center gap-1 text-xs font-semibold">
+                  Show more
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+        <p className="mt-3 text-center text-xs">Click to turn back</p>
+      </div>
       <div
         onClick={() => setFlipped((current) => !current)}
-        className="w-full cursor-pointer"
+        className="w-full cursor-pointer transition-[height] duration-180 ease-out"
+        style={{ height: cardHeight }}
       >
         <div
           className={`card-flip w-full text-left ${flipped ? "opacity-100" : ""}`}
         >
-          <div className={`card-inner ${flipped ? "is-flipped" : ""}`}>
+          <div
+            className={`card-inner ${flipped ? "is-flipped" : ""}`}
+            style={{ height: cardHeight }}
+          >
             <div className="card-face panel min-h-[280px] p-6 sm:p-8">
               <div className="flex items-start justify-between">
                 <span className="language-tag">
@@ -131,24 +226,55 @@ export function CollectionStudy({
                 </button>
               </div>
             </div>
-            <div className="card-face card-back min-h-[280px] rounded-2xl p-6 sm:p-8">
-              <div className="flex items-start justify-between">
-                <span className="rounded-full bg-white/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[.13em] text-[#508566]">
-                  Translation
-                </span>
-                <Check size={17} className="text-[#4a9b6e]" />
+            <div className="card-face card-back rounded-2xl p-6 sm:p-8">
+              <div ref={backRef}>
+                <div className="flex items-start justify-between">
+                  <span className="rounded-full bg-white/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[.13em] text-[#508566]">
+                    Translation
+                  </span>
+
+                  <Check size={17} className="text-[#4a9b6e]" />
+                </div>
+
+                <div className="mt-8 flex min-h-[140px] flex-col justify-center">
+                  <p className="text-center text-4xl font-bold tracking-[-.06em] sm:text-5xl">
+                    {card.translation}
+                  </p>
+
+                  {card.explanation && (
+                    <div className="mx-auto mt-4 max-w-md">
+                      <p
+                        ref={explanationRef}
+                        className={`text-center text-sm leading-6 text-[#65806e] ${
+                          explanationExpanded ? "" : "line-clamp-3"
+                        }`}
+                      >
+                        {card.explanation}
+                      </p>
+
+                      {(isOverflowing || explanationExpanded) && (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setExplanationExpanded((current) => !current);
+                          }}
+                          className="mx-auto mt-1.5 flex items-center gap-1 text-xs font-semibold text-[#3a8b5c] hover:underline"
+                        >
+                          {explanationExpanded ? "Show less" : "Show more"}
+
+                          <ChevronDown
+                            size={13}
+                            className={`transition-transform ${
+                              explanationExpanded ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="mt-8 flex min-h-[140px] flex-col justify-center">
-                <p className="text-center text-4xl font-bold tracking-[-.06em] sm:text-5xl">
-                  {card.translation}
-                </p>
-                <p className="mx-auto mt-4 max-w-md text-center text-sm leading-6 text-[#65806e]">
-                  {card.explanation}
-                </p>
-              </div>
-              <p className="mt-3 text-center text-xs text-[#698170]">
-                Click to turn back
-              </p>
             </div>
           </div>
         </div>

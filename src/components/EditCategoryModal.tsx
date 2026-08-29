@@ -44,80 +44,6 @@ export function EditCategoryModal({
   }
 
   return (
-    // <Modal
-    //   title="Edit collection"
-    //   subtitle="Update the collection details."
-    //   onClose={onClose}
-    // >
-    //   <form
-    //     onSubmit={(event) => {
-    //       event.preventDefault();
-    //       if (name.trim()) {
-    //         onSave(category.id, {
-    //           name: name.trim(),
-    //           sourceLanguage,
-    //           targetLanguage,
-    //         });
-    //       }
-    //     }}
-    //   >
-    //     <label className="field-label">
-    //       Collection name
-    //       <input
-    //         autoFocus
-    //         value={name}
-    //         onChange={(event) => setName(event.target.value)}
-    //         placeholder="e.g. Furniture"
-    //         className="field-input"
-    //       />
-    //     </label>
-
-    //     <div className="mt-4 grid grid-cols-2 gap-3">
-    //       <label className="field-label">
-    //         Source language
-    //         <select
-    //           value={sourceLanguage}
-    //           onChange={(event) =>
-    //             setSourceLanguage(event.target.value as LanguageCode)
-    //           }
-    //           className="field-input"
-    //         >
-    //           {LANGUAGE_OPTIONS.map((lang) => (
-    //             <option key={lang.code} value={lang.code}>
-    //               {lang.label}
-    //             </option>
-    //           ))}
-    //         </select>
-    //       </label>
-
-    //       <label className="field-label">
-    //         Target language
-    //         <select
-    //           value={targetLanguage}
-    //           onChange={(event) =>
-    //             setTargetLanguage(event.target.value as LanguageCode)
-    //           }
-    //           className="field-input"
-    //         >
-    //           {LANGUAGE_OPTIONS.map((lang) => (
-    //             <option key={lang.code} value={lang.code}>
-    //               {lang.label}
-    //             </option>
-    //           ))}
-    //         </select>
-    //       </label>
-    //     </div>
-
-    //     <div className="mt-5 flex justify-end gap-3">
-    //       <button type="button" onClick={onClose} className="secondary-button">
-    //         Cancel
-    //       </button>
-    //       <button className="primary-button" type="submit">
-    //         <Save size={17} /> Save changes
-    //       </button>
-    //     </div>
-    //   </form>
-    // </Modal>
     <Modal
       title="Edit collection"
       subtitle="Update the collection details."
@@ -188,8 +114,7 @@ export function EditCategoryModal({
               Видалити колекцію "{category.name}"?
             </p>
             <p className="mt-1 text-xs text-red-600">
-              Картки з цієї колекції не видаляться, але залишаться без
-              категорії.
+              Ви впевнені, що хочете видалити цю колекцію?
             </p>
             <div className="mt-3 flex justify-end gap-2">
               <button
