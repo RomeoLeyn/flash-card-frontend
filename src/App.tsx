@@ -61,6 +61,9 @@ export default function App() {
     browsedCards,
     browseLoading,
     loadAllCardsByCategory,
+    browseSortBy,
+    browseSortOrder,
+    setBrowseSort,
   } = useFlashcards(authenticated);
   const dueCards = cards.filter(
     (card) =>
@@ -101,6 +104,19 @@ export default function App() {
 
     void loadUser();
   }, [authenticated]);
+
+  useEffect(() => {
+    // Reload browsed cards when sort order changes in browse mode
+    if (browseMode && activeCategory) {
+      void loadAllCardsByCategory(activeCategory);
+    }
+  }, [
+    browseSortBy,
+    browseSortOrder,
+    browseMode,
+    activeCategory,
+    loadAllCardsByCategory,
+  ]);
 
   const handleCategoryChange = async (categoryId: string) => {
     setActiveCategory(categoryId);
@@ -229,6 +245,9 @@ export default function App() {
               browseLoading={browseLoading}
               onBrowseAll={() => handleBrowseAll(activeCategory)}
               onStudyMode={() => setBrowseMode(false)}
+              browseSortBy={browseSortBy}
+              browseSortOrder={browseSortOrder}
+              onBrowseSort={setBrowseSort}
             />
           )}
           {view === "review" && (

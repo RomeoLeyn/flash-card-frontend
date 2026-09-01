@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Layers3, LayoutGrid, Pencil, Plus, Sparkles } from "lucide-react";
 import type { Card, Category, ReviewQuality } from "@/types/flashcards";
+import {
+  CardSortBy,
+  SortOrder,
+  CARD_SORT_BY_OPTIONS,
+} from "@/common/constants/constants";
 import { CardGrid } from "./CardGrid";
 import { CollectionStudy } from "./CollectionStudy";
 
@@ -19,6 +24,9 @@ type CardsViewProps = {
   browseLoading: boolean;
   onBrowseAll: () => void;
   onStudyMode: () => void;
+  browseSortBy?: CardSortBy;
+  browseSortOrder?: SortOrder;
+  onBrowseSort?: (sortBy: CardSortBy, sortOrder: SortOrder) => void;
 };
 
 export function CardsView({
@@ -35,6 +43,9 @@ export function CardsView({
   browseLoading,
   onBrowseAll,
   onStudyMode,
+  browseSortBy = CardSortBy.WORD,
+  browseSortOrder = SortOrder.ASC,
+  onBrowseSort,
 }: CardsViewProps) {
   const isStudyMode = activeCategory !== "all";
   const activeCategoryName =
@@ -101,7 +112,61 @@ export function CardsView({
           </p>
         </div>
       ) : showGrid ? (
-        <CardGrid cards={cards} onEdit={onEditCard} onDelete={onDeleteCard} />
+        <>
+          {browseMode && onBrowseSort && (
+            <div className="mb-4 flex gap-3">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-semibold text-[#5a6764]">
+                  Sort by
+                </span>
+                <select
+                  value={browseSortBy}
+                  onChange={(e) => {
+                    const newSortBy = e.target.value as CardSortBy;
+                    // When switching to date sorting, default to "Newest First"
+                    const defaultOrder =
+                      newSortBy === CardSortBy.WORD
+                        ? SortOrder.ASC
+                        : SortOrder.DESC;
+                    onBrowseSort(newSortBy, defaultOrder);
+                  }}
+                  className="field-input"
+                >
+                  {CARD_SORT_BY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-semibold text-[#5a6764]">
+                  Order
+                </span>
+                <select
+                  value={browseSortOrder}
+                  onChange={(e) =>
+                    onBrowseSort(browseSortBy, e.target.value as SortOrder)
+                  }
+                  className="field-input"
+                >
+                  {browseSortBy === CardSortBy.WORD ? (
+                    <>
+                      <option value={SortOrder.ASC}>A-Z</option>
+                      <option value={SortOrder.DESC}>Z-A</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value={SortOrder.DESC}>Newest First</option>
+                      <option value={SortOrder.ASC}>Oldest First</option>
+                    </>
+                  )}
+                </select>
+              </label>
+            </div>
+          )}
+          <CardGrid cards={cards} onEdit={onEditCard} onDelete={onDeleteCard} />
+        </>
       ) : (
         <CollectionStudy
           cards={cards}

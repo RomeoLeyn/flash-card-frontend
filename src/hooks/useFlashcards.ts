@@ -10,7 +10,11 @@ import type {
   ReviewStats,
   UpdateCardInput,
 } from "@/types/flashcards";
-import { LanguageCode } from "@/common/constants/constants";
+import {
+  LanguageCode,
+  CardSortBy,
+  SortOrder,
+} from "@/common/constants/constants";
 
 function normalizeCard(card: any): Card {
   return {
@@ -50,6 +54,10 @@ export function useFlashcards(enabled = true) {
     null,
   );
   const [browseLoading, setBrowseLoading] = useState(false);
+  const [browseSortBy, setBrowseSortBy] = useState<CardSortBy>(CardSortBy.WORD);
+  const [browseSortOrder, setBrowseSortOrder] = useState<SortOrder>(
+    SortOrder.ASC,
+  );
 
   const load = useCallback(async () => {
     if (!enabled) return;
@@ -112,21 +120,28 @@ export function useFlashcards(enabled = true) {
     }
   }, [enabled]);
 
-  const loadAllCardsByCategory = useCallback(async (categoryId: string) => {
-    setBrowseLoading(true);
-    setError(null);
-    try {
-      const categoryCards = await cardService.getCardsByCategoryId(categoryId);
-      setBrowsedCards(normalizeCards(categoryCards));
-      setBrowsedCategoryId(categoryId);
-    } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Could not load all cards.",
-      );
-    } finally {
-      setBrowseLoading(false);
-    }
-  }, []);
+  const loadAllCardsByCategory = useCallback(
+    async (categoryId: string) => {
+      setBrowseLoading(true);
+      setError(null);
+      try {
+        const categoryCards = await cardService.getCardsByCategoryId(
+          categoryId,
+          browseSortBy,
+          browseSortOrder,
+        );
+        setBrowsedCards(normalizeCards(categoryCards));
+        setBrowsedCategoryId(categoryId);
+      } catch (cause) {
+        setError(
+          cause instanceof Error ? cause.message : "Could not load all cards.",
+        );
+      } finally {
+        setBrowseLoading(false);
+      }
+    },
+    [browseSortBy, browseSortOrder],
+  );
 
   const loadCardsByCategory = useCallback(
     async (categoryId: string) => {
@@ -249,6 +264,14 @@ export function useFlashcards(enabled = true) {
     setCards((current) => current.filter((c) => c.id !== id));
   };
 
+  const setBrowseSort = useCallback(
+    (sortBy: CardSortBy, sortOrder: SortOrder) => {
+      setBrowseSortBy(sortBy);
+      setBrowseSortOrder(sortOrder);
+    },
+    [],
+  );
+
   return {
     categories,
     cards,
@@ -271,5 +294,8 @@ export function useFlashcards(enabled = true) {
     browsedCategoryId,
     browseLoading,
     loadAllCardsByCategory,
+    browseSortBy,
+    browseSortOrder,
+    setBrowseSort,
   };
 }
