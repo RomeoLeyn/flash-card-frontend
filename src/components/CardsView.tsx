@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Layers3, LayoutGrid, Pencil, Plus, Sparkles } from "lucide-react";
+import {
+  Layers3,
+  LayoutGrid,
+  Pencil,
+  Plus,
+  Sparkles,
+  ArrowDown,
+  ArrowUp,
+} from "lucide-react";
 import type { Card, Category, ReviewQuality } from "@/types/flashcards";
 import {
   CardSortBy,
@@ -114,8 +122,8 @@ export function CardsView({
       ) : showGrid ? (
         <>
           {browseMode && onBrowseSort && (
-            <div className="mb-4 flex gap-3">
-              <label className="flex flex-col gap-1">
+            <div className="mb-4 flex gap-4 items-center justify-start flex-wrap">
+              <div className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-[#5a6764]">
                   Sort by
                 </span>
@@ -123,14 +131,13 @@ export function CardsView({
                   value={browseSortBy}
                   onChange={(e) => {
                     const newSortBy = e.target.value as CardSortBy;
-                    // When switching to date sorting, default to "Newest First"
                     const defaultOrder =
                       newSortBy === CardSortBy.WORD
                         ? SortOrder.ASC
                         : SortOrder.DESC;
                     onBrowseSort(newSortBy, defaultOrder);
                   }}
-                  className="field-input"
+                  className="field-input !mt-0"
                 >
                   {CARD_SORT_BY_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -138,31 +145,43 @@ export function CardsView({
                     </option>
                   ))}
                 </select>
-              </label>
-              <label className="flex flex-col gap-1">
+              </div>
+              <div className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-[#5a6764]">
                   Order
                 </span>
-                <select
-                  value={browseSortOrder}
-                  onChange={(e) =>
-                    onBrowseSort(browseSortBy, e.target.value as SortOrder)
+                <button
+                  onClick={() => {
+                    const newOrder =
+                      browseSortOrder === SortOrder.DESC
+                        ? SortOrder.ASC
+                        : SortOrder.DESC;
+                    onBrowseSort(browseSortBy, newOrder);
+                  }}
+                  className="flex items-center gap-2 rounded-lg border border-[#d0d5d1] bg-white px-3 py-2 max-h-[48px] text-sm font-medium text-[#5a6764] transition hover:bg-[#f5f5f5] active:bg-[#e8e8e8]"
+                  title={
+                    browseSortBy === CardSortBy.WORD
+                      ? browseSortOrder === SortOrder.ASC
+                        ? "A-Z"
+                        : "Z-A"
+                      : browseSortOrder === SortOrder.DESC
+                        ? "Newest First"
+                        : "Oldest First"
                   }
-                  className="field-input"
                 >
-                  {browseSortBy === CardSortBy.WORD ? (
+                  {browseSortOrder === SortOrder.DESC ? (
                     <>
-                      <option value={SortOrder.ASC}>A-Z</option>
-                      <option value={SortOrder.DESC}>Z-A</option>
+                      <ArrowDown size={16} />
+                      {browseSortBy === CardSortBy.WORD ? "Z-A" : "Newest"}
                     </>
                   ) : (
                     <>
-                      <option value={SortOrder.DESC}>Newest First</option>
-                      <option value={SortOrder.ASC}>Oldest First</option>
+                      <ArrowUp size={16} />
+                      {browseSortBy === CardSortBy.WORD ? "A-Z" : "Oldest"}
                     </>
                   )}
-                </select>
-              </label>
+                </button>
+              </div>
             </div>
           )}
           <CardGrid cards={cards} onEdit={onEditCard} onDelete={onDeleteCard} />
