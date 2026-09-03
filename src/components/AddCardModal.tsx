@@ -31,7 +31,7 @@ export function AddCardModal({
   const [translation, setTranslation] = useState(card?.translation ?? "");
   const [explanation, setExplanation] = useState(card?.explanation ?? "");
   const [categoryId, setCategoryId] = useState(
-    card?.categoryId ?? (activeCategory || categories[0]?.id) ?? "daily",
+    card?.categoryId || activeCategory || categories[0]?.id || "daily",
   );
 
   useEffect(() => {
@@ -39,8 +39,10 @@ export function AddCardModal({
     setWord(card.word);
     setTranslation(card.translation);
     setExplanation(card.explanation ?? "");
-    setCategoryId(card.categoryId);
-  }, [card]);
+    setCategoryId(
+      card.categoryId || activeCategory || categories[0]?.id || "daily",
+    );
+  }, [activeCategory, card, categories]);
 
   const selectedCategory = categories.find((c) => c.id === categoryId);
 

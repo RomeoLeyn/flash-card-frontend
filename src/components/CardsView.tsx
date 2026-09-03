@@ -81,7 +81,7 @@ export function CardsView({
         </div>
 
         <div className="flex gap-3">
-          {isStudyMode && cards.length > 0 && (
+          {isStudyMode && (
             <button
               onClick={browseMode ? onStudyMode : onBrowseAll}
               className="secondary-button self-start"

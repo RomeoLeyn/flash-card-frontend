@@ -191,8 +191,15 @@ export function useFlashcards(enabled = true) {
   };
 
   const updateCard = async (id: string, input: UpdateCardInput) => {
-    const updated = await cardService.update(id, input);
+    const currentCard = cards.find((card) => card.id === id);
+    const updated = await cardService.update(id, {
+      ...input,
+      categoryId: input.categoryId ?? currentCard?.categoryId ?? "",
+    });
     const normalized = normalizeCard(updated);
+    if (!normalized.categoryId) {
+      normalized.categoryId = input.categoryId ?? currentCard?.categoryId ?? "";
+    }
     setCards((current) => current.map((c) => (c.id === id ? normalized : c)));
     return normalized;
   };

@@ -251,10 +251,7 @@ export default function App() {
             />
           )}
           {view === "review" && (
-            <ReviewView
-              cards={dueCards.length ? dueCards : cards.slice(0, 3)}
-              onComplete={reviewCard}
-            />
+            <ReviewView cards={dueCards} onComplete={reviewCard} />
           )}
           {view === "profile" && (
             <ProfilePage

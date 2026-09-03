@@ -30,37 +30,6 @@ export function CollectionStudy({
 
   const pendingTimeout = useRef<number | null>(null);
 
-  if (finished || !card) {
-    return (
-      <div className="mx-auto max-w-xl text-center">
-        <div className="review-empty">
-          <Check size={28} />
-        </div>
-        <h1 className="mt-6 text-3xl font-bold tracking-[-.05em]">
-          Collection done.
-        </h1>
-        <p className="mt-3 text-[#7d8b82]">
-          You went through every card in {categoryName}.
-        </p>
-        <div className="mt-6 flex justify-center gap-3">
-          <button
-            onClick={() => {
-              setIndex(0);
-              setFlipped(false);
-              setFinished(false);
-            }}
-            className="secondary-button"
-          >
-            <RotateCcw size={16} /> Study again
-          </button>
-          <button onClick={onAdd} className="primary-button">
-            <Plus size={17} /> Add card
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const choose = (quality: ReviewQuality) => {
     onRate(card.id, quality);
     setFlipped(false);
@@ -108,6 +77,37 @@ export function CollectionStudy({
     if (!measureRef.current) return;
     setCardHeight(Math.max(280, measureRef.current.scrollHeight));
   }, [card, explanationExpanded]);
+
+  if (finished || !card) {
+    return (
+      <div className="mx-auto max-w-xl text-center">
+        <div className="review-empty">
+          <Check size={28} />
+        </div>
+        <h1 className="mt-6 text-3xl font-bold tracking-[-.05em]">
+          Collection done.
+        </h1>
+        <p className="mt-3 text-[#7d8b82]">
+          You went through every card in {categoryName}.
+        </p>
+        <div className="mt-6 flex justify-center gap-3">
+          <button
+            onClick={() => {
+              setIndex(0);
+              setFlipped(false);
+              setFinished(false);
+            }}
+            className="secondary-button"
+          >
+            <RotateCcw size={16} /> Study again
+          </button>
+          <button onClick={onAdd} className="primary-button">
+            <Plus size={17} /> Add card
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-[760px]">
