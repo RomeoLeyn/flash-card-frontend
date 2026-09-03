@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
-import type { Category } from "@/types/flashcards";
+import type { AiGenerationResult, Category } from "@/types/flashcards";
 import { Modal } from "./Modal";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 
@@ -8,7 +8,10 @@ type AiGeneratorModalProps = {
   categories: Category[];
   activeCategory?: string;
   onClose: () => void;
-  onGenerate: (prompt: string, categoryId: string) => Promise<string[]>;
+  onGenerate: (
+    prompt: string,
+    categoryId: string,
+  ) => Promise<AiGenerationResult>;
 };
 
 const PROMPT_PLACEHOLDERS = [
@@ -30,8 +33,6 @@ export function AiGeneratorModal({
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [skippedWords, setSkippedWords] = useState<string[] | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
   const submit = async (event: React.FormEvent) => {
@@ -43,19 +44,11 @@ export function AiGeneratorModal({
 
     setLoading(true);
     setError(null);
-    setSuccess(false);
 
     try {
-      const skipped = await onGenerate(prompt.trim(), categoryId);
-      setSkippedWords(skipped ?? []);
-      setSuccess(true);
-      if (skipped && skipped.length) {
-        setInfo(`Skipped duplicates: ${skipped.join(", ")}`);
-      }
-      setTimeout(() => {
-        setPrompt("");
-        onClose();
-      }, 1800);
+      await onGenerate(prompt.trim(), categoryId);
+      setPrompt("");
+      onClose();
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : "Failed to generate cards",
@@ -104,17 +97,6 @@ export function AiGeneratorModal({
         {error && (
           <div className="rounded-lg border border-[#e4b8b8] bg-[#fff3f3] p-3 text-sm text-[#c7563a]">
             {error}
-          </div>
-        )}
-        {success && (
-          <div className="rounded-lg border border-[#b8d8c4] bg-[#f3fff5] p-3 text-sm text-[#3a8b5c]">
-            <div>Cards generated successfully!</div>
-            {info && <div className="mt-1 text-sm text-[#3a8b5c]">{info}</div>}
-            {skippedWords && skippedWords.length > 0 && (
-              <div className="mt-2 text-sm text-[#567a5d]">
-                Skipped: {skippedWords.join(", ")}
-              </div>
-            )}
           </div>
         )}
         <div className="ai-hint">

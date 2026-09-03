@@ -48,3 +48,7 @@ export type CreateCardInput = Pick<
 > & { explanation?: string; createdByAi?: boolean };
 export type UpdateCardInput = Partial<Omit<CreateCardInput, "categoryId">> &
   Pick<CreateCardInput, "categoryId">;
+export type AiGenerationResult = {
+  createdCards: Card[];
+  skippedWords: string[];
+};

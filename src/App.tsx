@@ -14,6 +14,7 @@ import { CardsView } from "@/components/CardsView";
 import { ReviewView } from "@/components/ReviewView";
 import { AddCardModal } from "@/components/AddCardModal";
 import { AiGeneratorModal } from "@/components/AiGeneratorModal";
+import { GenerationResultModal } from "@/components/GenerationResultModal";
 import { CategoryModal } from "@/components/CategoryModal";
 import { LanguageCode } from "./common/constants/constants";
 import { EditCategoryModal } from "./components/EditCategoryModal";
@@ -28,6 +29,10 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [showAiGenerator, setShowAiGenerator] = useState(false);
+  const [generationResult, setGenerationResult] = useState<{
+    createdCards: Card[];
+    skippedWords: string[];
+  } | null>(null);
   const [showCategory, setShowCategory] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
     null,
@@ -161,6 +166,13 @@ export default function App() {
     setShowCategory(false);
   };
 
+  const generateCards = async (prompt: string, categoryId: string) => {
+    const result = await generateCardsFromAi(prompt, categoryId);
+    setShowAiGenerator(false);
+    setGenerationResult(result);
+    return result;
+  };
+
   const saveCategory = async (
     id: string,
     data: {
@@ -288,7 +300,14 @@ export default function App() {
           categories={categories.slice(1)}
           activeCategory={activeCategory}
           onClose={() => setShowAiGenerator(false)}
-          onGenerate={generateCardsFromAi}
+          onGenerate={generateCards}
+        />
+      )}
+      {generationResult && (
+        <GenerationResultModal
+          createdCards={generationResult.createdCards}
+          skippedWords={generationResult.skippedWords}
+          onClose={() => setGenerationResult(null)}
         />
       )}
       {showCategory && (
