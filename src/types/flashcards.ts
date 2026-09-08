@@ -4,6 +4,7 @@ export type Card = {
   sourceLanguage: string;
   targetLanguage: string;
   translation: string;
+  transcription: string | null;
   explanation: string;
   createdByAi: boolean;
   easeFactor: number;
@@ -45,7 +46,7 @@ export type ReviewStats = Record<string, number> & {
 export type CreateCardInput = Pick<
   Card,
   "word" | "sourceLanguage" | "targetLanguage" | "translation" | "categoryId"
-> & { explanation?: string; createdByAi?: boolean };
+> & { transcription?: string; explanation?: string; createdByAi?: boolean };
 export type UpdateCardInput = Partial<Omit<CreateCardInput, "categoryId">> &
   Pick<CreateCardInput, "categoryId">;
 export type AiGenerationResult = {

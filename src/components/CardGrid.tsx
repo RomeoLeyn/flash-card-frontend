@@ -67,6 +67,11 @@ export function CardGrid({ cards, onEdit, onDelete }: CardGridProps) {
                 <p className="text-2xl font-bold tracking-[-.04em]">
                   {card.word}
                 </p>
+                {card.transcription && (
+                  <p className="mt-1 text-sm text-[#718278]">
+                    {card.transcription}
+                  </p>
+                )}
                 <p className="mt-2 text-sm text-[#8d9991]">
                   Tap to reveal translation
                 </p>

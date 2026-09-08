@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { X } from "lucide-react";
 
 type ModalProps = {
   title: string;
@@ -25,7 +25,9 @@ export function Modal({
             <h2 className="text-2xl font-bold tracking-[-.05em]">{title}</h2>
             <p className="mt-1 text-sm text-[#829087]">{subtitle}</p>
           </div>
-          <button className="icon-button" onClick={onClose}><X size={18} /></button>
+          <button className="icon-button" onClick={onClose}>
+            <X size={18} />
+          </button>
         </div>
         {children}
       </div>

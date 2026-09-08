@@ -214,6 +214,11 @@ export function CollectionStudy({
                 <p className="text-center text-4xl font-bold tracking-[-.06em] sm:text-5xl">
                   {card.word}
                 </p>
+                {card.transcription && (
+                  <p className="mt-2 text-center text-base text-[#718278]">
+                    {card.transcription}
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={(event) => {

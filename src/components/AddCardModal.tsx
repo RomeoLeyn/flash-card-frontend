@@ -28,6 +28,7 @@ export function AddCardModal({
   const isEditing = !!card;
 
   const [word, setWord] = useState(card?.word ?? "");
+  const [transcription, setTranscription] = useState(card?.transcription ?? "");
   const [translation, setTranslation] = useState(card?.translation ?? "");
   const [explanation, setExplanation] = useState(card?.explanation ?? "");
   const [categoryId, setCategoryId] = useState(
@@ -37,6 +38,7 @@ export function AddCardModal({
   useEffect(() => {
     if (!card) return;
     setWord(card.word);
+    setTranscription(card.transcription ?? "");
     setTranslation(card.translation);
     setExplanation(card.explanation ?? "");
     setCategoryId(
@@ -53,6 +55,7 @@ export function AddCardModal({
     if (isEditing) {
       onSave!(card.id, {
         word: word.trim(),
+        transcription: transcription.trim() || undefined,
         translation: translation.trim(),
         explanation: explanation.trim() || undefined,
         categoryId,
@@ -63,6 +66,7 @@ export function AddCardModal({
         sourceLanguage: selectedCategory?.sourceLanguage ?? "en",
         targetLanguage: selectedCategory?.targetLanguage ?? "uk",
         translation: translation.trim(),
+        transcription: transcription.trim() || undefined,
         explanation: explanation.trim() || undefined,
         categoryId,
       });
@@ -91,6 +95,18 @@ export function AddCardModal({
           />
         </label>
         <div className="grid gap-4 sm:grid-cols-2">
+          <label className="field-label">
+            Transcription{" "}
+            <span className="font-normal normal-case tracking-normal text-[#99a49d]">
+              optional
+            </span>
+            <input
+              value={transcription}
+              onChange={(e) => setTranscription(e.target.value)}
+              placeholder="e.g. /ˌserənˈdipitē/"
+              className="field-input"
+            />
+          </label>
           <label className="field-label">
             Translation
             <input

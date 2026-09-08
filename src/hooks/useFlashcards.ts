@@ -40,6 +40,13 @@ function normalizeCards(cards: any[]): Card[] {
   return cards.map(normalizeCard);
 }
 
+function isDue(card: Card): boolean {
+  return Boolean(
+    card.nextReviewDate &&
+    new Date(card.nextReviewDate).getTime() <= Date.now(),
+  );
+}
+
 export function useFlashcards(enabled = true) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
@@ -186,13 +193,21 @@ export function useFlashcards(enabled = true) {
   };
 
   const createCard = async (input: CreateCardInput) => {
-    const card = await cardService.create(input);
-    setCards((current) => [card, ...current]);
+    const card = normalizeCard(await cardService.create(input));
+    if (!card.categoryId) {
+      card.categoryId = input.categoryId;
+    }
+    await load();
+    if (browsedCategoryId === card.categoryId) {
+      await loadAllCardsByCategory(card.categoryId);
+    }
     return card;
   };
 
   const updateCard = async (id: string, input: UpdateCardInput) => {
-    const currentCard = cards.find((card) => card.id === id);
+    const currentCard =
+      cards.find((card) => card.id === id) ??
+      browsedCards.find((card) => card.id === id);
     const updated = await cardService.update(id, {
       ...input,
       categoryId: input.categoryId ?? currentCard?.categoryId ?? "",
@@ -202,22 +217,72 @@ export function useFlashcards(enabled = true) {
       normalized.categoryId = input.categoryId ?? currentCard?.categoryId ?? "";
     }
     setCards((current) => current.map((c) => (c.id === id ? normalized : c)));
+    setBrowsedCards((current) =>
+      current.map((card) => (card.id === id ? normalized : card)),
+    );
+    if (currentCard) {
+      const wasDue = isDue(currentCard);
+      const isNowDue = isDue(normalized);
+      if (
+        wasDue !== isNowDue ||
+        currentCard.categoryId !== normalized.categoryId
+      ) {
+        setCategoryDueCounts((current) => {
+          const next = { ...current };
+          if (wasDue) {
+            next.all = Math.max(0, (next.all ?? 0) - 1);
+            next[currentCard.categoryId] = Math.max(
+              0,
+              (next[currentCard.categoryId] ?? 0) - 1,
+            );
+          }
+          if (isNowDue) {
+            next.all = (next.all ?? 0) + 1;
+            next[normalized.categoryId] =
+              (next[normalized.categoryId] ?? 0) + 1;
+          }
+          return next;
+        });
+      }
+    }
     return normalized;
   };
 
   const reviewCard = async (id: string, quality: ReviewQuality) => {
-    const updated = await reviewService.submit(id, quality);
+    const currentCard = cards.find((card) => card.id === id);
+    const updated = normalizeCard(await reviewService.submit(id, quality));
+    if (!updated.categoryId && currentCard) {
+      updated.categoryId = currentCard.categoryId;
+    }
     setCards((current) =>
       current.map((card) => (card.id === id ? updated : card)),
     );
-    setCategoryDueCounts((current) => {
-      if (!updated.categoryId) return current;
-      const next = { ...current };
-      if (typeof next[updated.categoryId] === "number")
-        next[updated.categoryId] = Math.max(0, next[updated.categoryId] - 1);
-      if (typeof next.all === "number") next.all = Math.max(0, next.all - 1);
-      return next;
-    });
+    setBrowsedCards((current) =>
+      current.map((card) => (card.id === id ? updated : card)),
+    );
+    if (currentCard && isDue(currentCard) && !isDue(updated)) {
+      setCategoryDueCounts((current) => {
+        if (!currentCard.categoryId) return current;
+        const next = { ...current };
+        next[currentCard.categoryId] = Math.max(
+          0,
+          (next[currentCard.categoryId] ?? 0) - 1,
+        );
+        next.all = Math.max(0, (next.all ?? 0) - 1);
+        return next;
+      });
+    }
+    if (currentCard && isDue(currentCard) && !isDue(updated)) {
+      setReviewStats((current) =>
+        current
+          ? {
+              ...current,
+              dueCount: Math.max(0, (current.dueCount ?? 0) - 1),
+              reviewedToday: (current.reviewedToday ?? 0) + 1,
+            }
+          : current,
+      );
+    }
   };
 
   const generateCardsFromAi = async (
@@ -228,6 +293,22 @@ export function useFlashcards(enabled = true) {
     const generatedCards = resp.createdCards ?? [];
     const normalizedGenerated = normalizeCards(generatedCards);
     setCards((current) => [...normalizedGenerated, ...current]);
+    setBrowsedCards((current) =>
+      current.length > 0 && current[0]?.categoryId === categoryId
+        ? [...normalizedGenerated, ...current]
+        : current,
+    );
+    setReviewStats((current) =>
+      current
+        ? {
+            ...current,
+            total: (current.total ?? 0) + normalizedGenerated.length,
+            dueCount:
+              (current.dueCount ?? 0) +
+              normalizedGenerated.filter(isDue).length,
+          }
+        : current,
+    );
     setCategoryDueCounts((current) => {
       const next = { ...current };
       if (typeof next[categoryId] === "number")
@@ -274,8 +355,36 @@ export function useFlashcards(enabled = true) {
   };
 
   const deleteCard = async (id: string) => {
+    const deletedCard =
+      cards.find((card) => card.id === id) ??
+      browsedCards.find((card) => card.id === id);
     await cardService.remove(id);
     setCards((current) => current.filter((c) => c.id !== id));
+    setBrowsedCards((current) => current.filter((card) => card.id !== id));
+    if (deletedCard) {
+      setReviewStats((current) =>
+        current
+          ? {
+              ...current,
+              total: Math.max(0, (current.total ?? 0) - 1),
+              dueCount: Math.max(
+                0,
+                (current.dueCount ?? 0) - (isDue(deletedCard) ? 1 : 0),
+              ),
+            }
+          : current,
+      );
+      if (isDue(deletedCard)) {
+        setCategoryDueCounts((current) => ({
+          ...current,
+          all: Math.max(0, (current.all ?? 0) - 1),
+          [deletedCard.categoryId]: Math.max(
+            0,
+            (current[deletedCard.categoryId] ?? 0) - 1,
+          ),
+        }));
+      }
+    }
   };
 
   const setBrowseSort = useCallback(
