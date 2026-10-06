@@ -31,6 +31,7 @@ export function AddCardModal({
   const [transcription, setTranscription] = useState(card?.transcription ?? "");
   const [translation, setTranslation] = useState(card?.translation ?? "");
   const [explanation, setExplanation] = useState(card?.explanation ?? "");
+  const [example, setExample] = useState(card?.example ?? "");
   const [categoryId, setCategoryId] = useState(
     card?.categoryId || activeCategory || categories[0]?.id || "daily",
   );
@@ -41,6 +42,7 @@ export function AddCardModal({
     setTranscription(card.transcription ?? "");
     setTranslation(card.translation);
     setExplanation(card.explanation ?? "");
+    setExample(card.example ?? "");
     setCategoryId(
       card.categoryId || activeCategory || categories[0]?.id || "daily",
     );
@@ -58,6 +60,7 @@ export function AddCardModal({
         transcription: transcription.trim() || undefined,
         translation: translation.trim(),
         explanation: explanation.trim() || undefined,
+        example: example.trim() || undefined,
         categoryId,
       });
     } else {
@@ -68,6 +71,7 @@ export function AddCardModal({
         translation: translation.trim(),
         transcription: transcription.trim() || undefined,
         explanation: explanation.trim() || undefined,
+        example: example.trim() || undefined,
         categoryId,
       });
     }
@@ -141,6 +145,19 @@ export function AddCardModal({
             onChange={(e) => setExplanation(e.target.value)}
             placeholder="Add a helpful context or example..."
             rows={3}
+            className="field-input resize-none"
+          />
+        </label>
+        <label className="field-label">
+          Example{" "}
+          <span className="font-normal normal-case tracking-normal text-[#99a49d]">
+            optional
+          </span>
+          <textarea
+            value={example}
+            onChange={(e) => setExample(e.target.value)}
+            placeholder="Add an example sentence..."
+            rows={2}
             className="field-input resize-none"
           />
         </label>

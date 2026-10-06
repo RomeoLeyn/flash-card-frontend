@@ -1,5 +1,7 @@
 import { http, json, patchJson } from "@/lib/httpClient";
 import type {
+  AiGenerationRequest,
+  AiGenerationResult,
   Card,
   CreateCardInput,
   UpdateCardInput,
@@ -40,9 +42,6 @@ export const cardService = {
   update: (id: string, input: UpdateCardInput) =>
     http<Card>(`/cards/update/${id}`, patchJson(input)),
   remove: (id: string) => http<void>(`/cards/${id}`, { method: "DELETE" }),
-  generateFromAi: (prompt: string, categoryId: string) =>
-    http<{ created: number; createdCards: Card[]; skippedWords: string[] }>(
-      "/ai/generate",
-      json({ prompt, categoryId }),
-    ),
+  generateFromAi: (request: AiGenerationRequest) =>
+    http<AiGenerationResult>("/ai/generate", json(request)),
 };

@@ -99,6 +99,11 @@ export function CardGrid({ cards, onEdit, onDelete }: CardGridProps) {
                 <p className="mt-3 text-sm leading-6 text-[#65806e]">
                   {card.explanation}
                 </p>
+                {card.example && (
+                  <p className="mt-3 text-sm italic leading-6 text-[#718278]">
+                    {card.example}
+                  </p>
+                )}
               </div>
               <div className="mt-8 border-t border-[#cce1d1] pt-4 text-xs text-[#698170]">
                 Click to turn back

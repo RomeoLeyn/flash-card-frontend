@@ -6,6 +6,7 @@ import type {
   Card,
   Category,
   CreateCardInput,
+  AiGenerationRequest,
   AiGenerationResult,
   ReviewQuality,
   ReviewStats,
@@ -286,10 +287,10 @@ export function useFlashcards(enabled = true) {
   };
 
   const generateCardsFromAi = async (
-    prompt: string,
-    categoryId: string,
+    request: AiGenerationRequest,
   ): Promise<AiGenerationResult> => {
-    const resp = await cardService.generateFromAi(prompt, categoryId);
+    const resp = await cardService.generateFromAi(request);
+    const categoryId = request.categoryId;
     const generatedCards = resp.createdCards ?? [];
     const normalizedGenerated = normalizeCards(generatedCards);
     setCards((current) => [...normalizedGenerated, ...current]);
@@ -318,6 +319,13 @@ export function useFlashcards(enabled = true) {
     });
 
     return {
+      requestedCount:
+        resp.requestedCount ??
+        (request.mode === "generate" ? request.count : request.words.length),
+      generatedCount: resp.generatedCount ?? normalizedGenerated.length,
+      retryAttempts: resp.retryAttempts ?? 0,
+      unfulfilledCount: resp.unfulfilledCount ?? 0,
+      created: resp.created ?? normalizedGenerated.length,
       createdCards: normalizedGenerated,
       skippedWords: resp.skippedWords ?? [],
     };

@@ -71,9 +71,18 @@ export function ReviewView({ cards, onComplete }: ReviewViewProps) {
             </p>
           )}
           {revealed && (
-            <p className="mx-auto mt-5 max-w-md text-center leading-7 text-[#6b8173]">
-              {card.explanation}
-            </p>
+            <>
+              {card.explanation && (
+                <p className="mx-auto mt-5 max-w-md text-center leading-7 text-[#6b8173]">
+                  {card.explanation}
+                </p>
+              )}
+              {card.example && (
+                <p className="mx-auto mt-3 max-w-md text-center text-sm italic leading-6 text-[#718278]">
+                  {card.example}
+                </p>
+              )}
+            </>
           )}
           <button
             onClick={() => setRevealed(true)}

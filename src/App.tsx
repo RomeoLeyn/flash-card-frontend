@@ -5,6 +5,8 @@ import { AuthPage } from "@/components/AuthPage";
 import type {
   Card,
   CreateCardInput,
+  AiGenerationRequest,
+  AiGenerationResult,
   ReviewQuality,
   UpdateCardInput,
 } from "@/types/flashcards";
@@ -29,10 +31,8 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [showAiGenerator, setShowAiGenerator] = useState(false);
-  const [generationResult, setGenerationResult] = useState<{
-    createdCards: Card[];
-    skippedWords: string[];
-  } | null>(null);
+  const [generationResult, setGenerationResult] =
+    useState<AiGenerationResult | null>(null);
   const [showCategory, setShowCategory] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
     null,
@@ -166,8 +166,8 @@ export default function App() {
     setShowCategory(false);
   };
 
-  const generateCards = async (prompt: string, categoryId: string) => {
-    const result = await generateCardsFromAi(prompt, categoryId);
+  const generateCards = async (request: AiGenerationRequest) => {
+    const result = await generateCardsFromAi(request);
     setShowAiGenerator(false);
     setGenerationResult(result);
     return result;
@@ -305,8 +305,7 @@ export default function App() {
       )}
       {generationResult && (
         <GenerationResultModal
-          createdCards={generationResult.createdCards}
-          skippedWords={generationResult.skippedWords}
+          result={generationResult}
           onClose={() => setGenerationResult(null)}
         />
       )}
