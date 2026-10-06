@@ -1,22 +1,28 @@
 import { Check, Copy, Sparkles } from "lucide-react";
-import type { Card } from "@/types/flashcards";
+import type { AiGenerationResult } from "@/types/flashcards";
 import { Modal } from "./Modal";
 
 type GenerationResultModalProps = {
-  createdCards: Card[];
-  skippedWords: string[];
+  result: AiGenerationResult;
   onClose: () => void;
 };
 
 export function GenerationResultModal({
-  createdCards,
-  skippedWords,
+  result,
   onClose,
 }: GenerationResultModalProps) {
+  const {
+    createdCards,
+    skippedWords,
+    generatedCount,
+    created,
+    unfulfilledCount,
+  } = result;
+
   return (
     <Modal
       title="Generation complete"
-      subtitle="Review the cards added to your collection."
+      subtitle={`${generatedCount} cards generated, ${created} created.`}
       onClose={onClose}
       className="max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-h-[calc(100dvh-2.5rem)]"
     >
@@ -27,7 +33,7 @@ export function GenerationResultModal({
               <Check size={17} /> New cards
             </span>
             <span className="rounded-full bg-white/80 px-2.5 py-1 text-xs">
-              {createdCards.length}
+              {created}
             </span>
           </div>
           {createdCards.length > 0 ? (
@@ -57,6 +63,13 @@ export function GenerationResultModal({
             </p>
           )}
         </section>
+
+        {unfulfilledCount > 0 && (
+          <p className="rounded-lg border border-[#e6d1ad] bg-[#fffaf0] p-3 text-sm text-[#765a36]">
+            {unfulfilledCount} requested{" "}
+            {unfulfilledCount === 1 ? "card was" : "cards were"} not generated.
+          </p>
+        )}
 
         <section className="rounded-2xl border border-[#e6d1ad] bg-[#fffaf0] p-3 sm:p-4">
           <div className="flex items-center justify-between gap-3 text-sm font-bold text-[#a46b25]">

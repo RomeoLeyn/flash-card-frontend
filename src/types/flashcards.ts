@@ -6,6 +6,7 @@ export type Card = {
   translation: string;
   transcription: string | null;
   explanation: string;
+  example: string | null;
   createdByAi: boolean;
   easeFactor: number;
   repetitions: number;
@@ -46,10 +47,34 @@ export type ReviewStats = Record<string, number> & {
 export type CreateCardInput = Pick<
   Card,
   "word" | "sourceLanguage" | "targetLanguage" | "translation" | "categoryId"
-> & { transcription?: string; explanation?: string; createdByAi?: boolean };
+> & {
+  transcription?: string;
+  explanation?: string;
+  example?: string;
+  createdByAi?: boolean;
+};
 export type UpdateCardInput = Partial<Omit<CreateCardInput, "categoryId">> &
   Pick<CreateCardInput, "categoryId">;
+export type AiGenerationRequest =
+  | {
+      mode: "generate";
+      categoryId: string;
+      count: number;
+      prompt: string;
+    }
+  | {
+      mode: "from_list";
+      categoryId: string;
+      words: string[];
+      prompt?: string;
+    };
+
 export type AiGenerationResult = {
+  requestedCount: number;
+  generatedCount: number;
+  retryAttempts: number;
+  unfulfilledCount: number;
+  created: number;
   createdCards: Card[];
   skippedWords: string[];
 };

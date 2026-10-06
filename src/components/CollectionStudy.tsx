@@ -186,6 +186,11 @@ export function CollectionStudy({
               )}
             </div>
           )}
+          {card.example && (
+            <p className="mx-auto mt-3 max-w-md text-center text-sm italic leading-6 text-[#718278]">
+              {card.example}
+            </p>
+          )}
         </div>
         <p className="mt-3 text-center text-xs">Click to turn back</p>
       </div>
@@ -277,6 +282,11 @@ export function CollectionStudy({
                         </button>
                       )}
                     </div>
+                  )}
+                  {card.example && (
+                    <p className="mx-auto mt-3 max-w-md text-center text-sm italic leading-6 text-[#718278]">
+                      {card.example}
+                    </p>
                   )}
                 </div>
               </div>
