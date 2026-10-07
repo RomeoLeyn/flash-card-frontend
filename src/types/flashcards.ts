@@ -55,12 +55,14 @@ export type CreateCardInput = Pick<
 };
 export type UpdateCardInput = Partial<Omit<CreateCardInput, "categoryId">> &
   Pick<CreateCardInput, "categoryId">;
+export type CefrLevel = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 export type AiGenerationRequest =
   | {
       mode: "generate";
       categoryId: string;
       count: number;
       prompt: string;
+      level?: CefrLevel;
     }
   | {
       mode: "from_list";

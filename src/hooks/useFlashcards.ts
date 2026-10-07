@@ -395,6 +395,19 @@ export function useFlashcards(enabled = true) {
     }
   };
 
+  const bulkDeleteCards = async (ids: string[]) => {
+    const uniqueIds = [...new Set(ids)];
+    if (uniqueIds.length === 0) return;
+
+    await cardService.bulkRemove(uniqueIds);
+    await Promise.all([
+      load(),
+      browsedCategoryId
+        ? loadAllCardsByCategory(browsedCategoryId)
+        : Promise.resolve(),
+    ]);
+  };
+
   const setBrowseSort = useCallback(
     (sortBy: CardSortBy, sortOrder: SortOrder) => {
       setBrowseSortBy(sortBy);
@@ -417,6 +430,7 @@ export function useFlashcards(enabled = true) {
     getCardsByCategoryId,
     updateCard,
     deleteCard,
+    bulkDeleteCards,
     reviewCard,
     generateCardsFromAi,
     updateCategory,

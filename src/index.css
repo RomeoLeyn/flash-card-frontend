@@ -262,6 +262,7 @@ button {
 }
 
 .review-card {
+  position: relative;
   min-height: 390px;
   display: grid;
   place-items: center;
