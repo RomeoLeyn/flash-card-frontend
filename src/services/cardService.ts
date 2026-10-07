@@ -42,6 +42,11 @@ export const cardService = {
   update: (id: string, input: UpdateCardInput) =>
     http<Card>(`/cards/update/${id}`, patchJson(input)),
   remove: (id: string) => http<void>(`/cards/${id}`, { method: "DELETE" }),
+  bulkRemove: (ids: string[]) =>
+    http<{ deleted: number }>("/cards/bulk", {
+      method: "DELETE",
+      body: JSON.stringify({ ids }),
+    }),
   generateFromAi: (request: AiGenerationRequest) =>
     http<AiGenerationResult>("/ai/generate", json(request)),
 };

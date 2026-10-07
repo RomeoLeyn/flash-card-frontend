@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { Check, RotateCcw } from "lucide-react";
+import { Check, Pencil, RotateCcw } from "lucide-react";
 import type { Card, ReviewQuality } from "@/types/flashcards";
 
 type ReviewViewProps = {
   cards: Card[];
   onComplete: (id: string, quality: ReviewQuality) => void;
+  onEditCard: (card: Card) => void;
 };
 
-export function ReviewView({ cards, onComplete }: ReviewViewProps) {
+export function ReviewView({
+  cards,
+  onComplete,
+  onEditCard,
+}: ReviewViewProps) {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const card = cards[index];
@@ -58,6 +63,15 @@ export function ReviewView({ cards, onComplete }: ReviewViewProps) {
         />
       </div>
       <div className={`review-card ${revealed ? "review-card-revealed" : ""}`}>
+        <button
+          type="button"
+          onClick={() => onEditCard(card)}
+          className="icon-button absolute right-4 top-4"
+          aria-label="Edit card"
+          title="Edit card"
+        >
+          <Pencil size={16} />
+        </button>
         <div className="review-content">
           <span className="language-tag">
             {card.sourceLanguage} → {card.targetLanguage}

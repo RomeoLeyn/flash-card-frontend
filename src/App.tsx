@@ -58,6 +58,7 @@ export default function App() {
     createCard,
     updateCard,
     deleteCard,
+    bulkDeleteCards,
     reviewCard,
     loadCardsByCategory,
     generateCardsFromAi,
@@ -252,6 +253,7 @@ export default function App() {
               onEditCategory={() => setEditingCategoryId(activeCategory)}
               onEditCard={setEditingCard}
               onDeleteCard={deleteCard}
+              onDeleteCards={bulkDeleteCards}
               onRate={reviewCard}
               browseMode={browseMode}
               browseLoading={browseLoading}
@@ -263,7 +265,11 @@ export default function App() {
             />
           )}
           {view === "review" && (
-            <ReviewView cards={dueCards} onComplete={reviewCard} />
+            <ReviewView
+              cards={dueCards}
+              onComplete={reviewCard}
+              onEditCard={setEditingCard}
+            />
           )}
           {view === "profile" && (
             <ProfilePage

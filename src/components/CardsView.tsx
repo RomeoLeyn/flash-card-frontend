@@ -27,6 +27,7 @@ type CardsViewProps = {
   onEditCategory: () => void;
   onEditCard: (card: Card) => void;
   onDeleteCard: (id: string) => Promise<void> | void;
+  onDeleteCards: (ids: string[]) => Promise<void>;
   onRate: (id: string, quality: ReviewQuality) => void;
   browseMode: boolean;
   browseLoading: boolean;
@@ -46,6 +47,7 @@ export function CardsView({
   onEditCategory,
   onEditCard,
   onDeleteCard,
+  onDeleteCards,
   onRate,
   browseMode,
   browseLoading,
@@ -184,7 +186,13 @@ export function CardsView({
               </div>
             </div>
           )}
-          <CardGrid cards={cards} onEdit={onEditCard} onDelete={onDeleteCard} />
+          <CardGrid
+            cards={cards}
+            onEdit={onEditCard}
+            onDelete={onDeleteCard}
+            onDeleteMany={onDeleteCards}
+            bulkSelectionEnabled={browseMode}
+          />
         </>
       ) : (
         <CollectionStudy
@@ -192,6 +200,7 @@ export function CardsView({
           categoryName={activeCategoryName}
           onRate={onRate}
           onAdd={onAdd}
+          onEditCard={onEditCard}
         />
       )}
     </>

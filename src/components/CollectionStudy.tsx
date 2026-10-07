@@ -1,5 +1,12 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { Check, ChevronDown, Plus, RotateCcw, Sparkles } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Sparkles,
+} from "lucide-react";
 import type { Card, ReviewQuality } from "@/types/flashcards";
 
 type CollectionStudyProps = {
@@ -7,6 +14,7 @@ type CollectionStudyProps = {
   categoryName: string;
   onRate: (id: string, quality: ReviewQuality) => void;
   onAdd: () => void;
+  onEditCard: (card: Card) => void;
 };
 
 export function CollectionStudy({
@@ -14,6 +22,7 @@ export function CollectionStudy({
   categoryName,
   onRate,
   onAdd,
+  onEditCard,
 }: CollectionStudyProps) {
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -211,9 +220,23 @@ export function CollectionStudy({
                 <span className="language-tag">
                   {card.sourceLanguage} → {card.targetLanguage}
                 </span>
-                {card.createdByAi && (
-                  <Sparkles size={16} className="text-[#58a77a]" />
-                )}
+                <div className="flex items-center gap-1.5">
+                  {card.createdByAi && (
+                    <Sparkles size={16} className="text-[#58a77a]" />
+                  )}
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onEditCard(card);
+                    }}
+                    className="icon-button"
+                    aria-label="Edit card"
+                    title="Edit card"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                </div>
               </div>
               <div className="mt-12 flex min-h-[180px] flex-col justify-center">
                 <p className="text-center text-4xl font-bold tracking-[-.06em] sm:text-5xl">
@@ -243,7 +266,21 @@ export function CollectionStudy({
                     Translation
                   </span>
 
-                  <Check size={17} className="text-[#4a9b6e]" />
+                  <div className="flex items-center gap-1.5">
+                    <Check size={17} className="text-[#4a9b6e]" />
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onEditCard(card);
+                      }}
+                      className="icon-button"
+                      aria-label="Edit card"
+                      title="Edit card"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-8 flex min-h-[140px] flex-col justify-center">

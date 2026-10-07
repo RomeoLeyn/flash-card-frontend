@@ -4,6 +4,7 @@ import type {
   AiGenerationRequest,
   AiGenerationResult,
   Category,
+  CefrLevel,
 } from "@/types/flashcards";
 import { Modal } from "./Modal";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
@@ -18,6 +19,7 @@ type AiGeneratorModalProps = {
 const PROMPT_PLACEHOLDERS = [
   "e.g. Generate 15 furniture words in Ukrainian with translations and examples",
 ];
+const CEFR_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 
 export function AiGeneratorModal({
   categories,
@@ -30,6 +32,7 @@ export function AiGeneratorModal({
   const [instructions, setInstructions] = useState("");
   const [wordsInput, setWordsInput] = useState("");
   const [count, setCount] = useState("15");
+  const [level, setLevel] = useState<CefrLevel | "">("");
   const [categoryId, setCategoryId] = useState(
     categories.some((c) => c.id === activeCategory)
       ? activeCategory!
@@ -63,6 +66,7 @@ export function AiGeneratorModal({
         categoryId,
         count: parsedCount,
         prompt: prompt.trim(),
+        ...(level ? { level } : {}),
       };
     } else {
       const seenWords = new Set<string>();
@@ -184,6 +188,28 @@ export function AiGeneratorModal({
                 className="field-input"
                 disabled={loading}
               />
+            </label>
+            <label className="field-label">
+              Word level (CEFR)
+              <select
+                value={level}
+                onChange={(e) =>
+                  setLevel(
+                    CEFR_LEVELS.find(
+                      (option) => option === e.target.value,
+                    ) ?? "",
+                  )
+                }
+                className="field-input"
+                disabled={loading}
+              >
+                <option value="">Any level</option>
+                {CEFR_LEVELS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="field-label">
               Your prompt <span aria-hidden="true">*</span>
