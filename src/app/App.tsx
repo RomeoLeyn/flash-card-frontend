@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { authService } from "@/services/authService";
 import { useFlashcards } from "@/hooks/useFlashcards";
-import { AuthPage } from "@/components/AuthPage";
+import { AuthPage } from "@/features/auth/AuthPage";
 import { LandingPage } from "@/features/landing/LandingPage";
 import type {
   Card,
@@ -23,7 +23,7 @@ import { GenerationResultModal } from "@/features/cards/GenerationResultModal";
 import { CategoryModal } from "@/features/collections/CategoryModal";
 import { LanguageCode } from "@/common/constants/constants";
 import { EditCategoryModal } from "@/features/collections/EditCategoryModal";
-import { ProfilePage } from "@/pages/ProfilePage";
+import { ProfilePage } from "@/features/profile/ProfilePage";
 import { userService } from "@/services/userService";
 
 type View =
