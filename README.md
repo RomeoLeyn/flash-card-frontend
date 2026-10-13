@@ -62,12 +62,13 @@ src/
     App.tsx               Application state and authenticated view composition
   components/             Shared UI primitives and existing feature components
   features/
+    auth/                 Sign-in and registration screens
     cards/                Card library, study/review flows, and card dialogs
     collections/          Collection list page and collection-specific dialogs
     dashboard/            Authenticated learning home
     landing/              Public marketing page
+    profile/              Account profile and settings screen
     statistics/           Learning statistics page
-  pages/                  Existing page-level screens
   hooks/                  Reusable React state and data hooks
   services/               HTTP API operations grouped by domain
   lib/                    HTTP client and small shared utilities
@@ -109,6 +110,7 @@ environment files such as `.env`.
 
 | File | Purpose |
 | --- | --- |
+| `src/features/auth/AuthPage.tsx` | Sign-in and account registration form. |
 | `src/features/landing/LandingPage.tsx` | Public product landing page and entry points to sign-in or registration. |
 | `src/features/dashboard/DashboardPage.tsx` | Authenticated learning home, review prompt, quick action, and collection shortcuts. |
 | `src/features/cards/CardsView.tsx` | Collection/card workspace with study and browse modes. |
@@ -122,19 +124,13 @@ environment files such as `.env`.
 | `src/features/collections/CollectionsPage.tsx` | Lists collections and allows the user to open or create one. |
 | `src/features/collections/CategoryModal.tsx` | Creates a collection and selects its languages. |
 | `src/features/collections/EditCategoryModal.tsx` | Edits or removes an existing collection. |
+| `src/features/profile/ProfilePage.tsx` | Account profile, password, and personal learning settings screen. |
 | `src/features/statistics/StatisticsPage.tsx` | Displays review and card-count summary statistics. |
-
-### Existing pages
-
-| File | Purpose |
-| --- | --- |
-| `src/pages/ProfilePage.tsx` | Account profile, password, and personal learning settings screen. |
 
 ### UI components
 
 | File | Purpose |
 | --- | --- |
-| `src/components/AuthPage.tsx` | Sign-in and account registration form. |
 | `src/components/Sidebar.tsx` | Authenticated side navigation and top application header. |
 | `src/components/NavItem.tsx` | Reusable navigation item used by the sidebar. |
 | `src/components/StatCard.tsx` | Reusable summary metric card used on the statistics screen. |
@@ -167,8 +163,7 @@ maintained module or public API.
 `src/app/App.tsx` currently owns authentication state, authenticated view
 selection, and coordination between data hooks and page components. Feature-
 specific UI is being moved under `features/`; shared primitives remain in
-`components/`, and the profile screen remains in `pages/` until its feature
-migration. Continue moving code incrementally as those areas change.
+`components/`. Continue moving code incrementally as those areas change.
 `useFlashcards` loads and mutates card, collection, and review data through the
 domain services in `services/`. UI components receive data and callbacks from
 the app layer.
@@ -199,8 +194,7 @@ As the app grows, a **feature-based structure with shared UI and a small app
 layer** is a good fit. Page-level and card features now live in
 `features/collections/`, `features/dashboard/`, `features/landing/`,
 `features/statistics/`, and `features/cards/`. Continue by moving
-domain-specific components and hooks alongside their feature pages (for
-example, authentication and profile). Keep
+domain-specific components and hooks alongside their feature pages. Keep
 truly reusable primitives and layout elements in a shared UI area, and keep
 application composition, providers, and route configuration in an `app/`
 layer when that layer is introduced.
