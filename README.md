@@ -62,6 +62,7 @@ src/
     App.tsx               Application state and authenticated view composition
   components/             Shared UI primitives and existing feature components
   features/
+    cards/                Card library, study/review flows, and card dialogs
     collections/          Collection list page and collection-specific dialogs
     dashboard/            Authenticated learning home
     landing/              Public marketing page
@@ -110,6 +111,14 @@ environment files such as `.env`.
 | --- | --- |
 | `src/features/landing/LandingPage.tsx` | Public product landing page and entry points to sign-in or registration. |
 | `src/features/dashboard/DashboardPage.tsx` | Authenticated learning home, review prompt, quick action, and collection shortcuts. |
+| `src/features/cards/CardsView.tsx` | Collection/card workspace with study and browse modes. |
+| `src/features/cards/CardGrid.tsx` | Renders cards as a grid and supports card selection/actions. |
+| `src/features/cards/CollectionStudy.tsx` | Study experience for cards in a selected collection. |
+| `src/features/cards/ReviewView.tsx` | Spaced-repetition session for cards due for review. |
+| `src/features/cards/AddCardModal.tsx` | Creates a flashcard or edits an existing one. |
+| `src/features/cards/AiGeneratorModal.tsx` | Collects input for AI card generation from a prompt or word list. |
+| `src/features/cards/GenerationResultModal.tsx` | Summarizes the result of AI card generation. |
+| `src/features/cards/ConfirmationModal.tsx` | Confirms destructive card actions such as deletion. |
 | `src/features/collections/CollectionsPage.tsx` | Lists collections and allows the user to open or create one. |
 | `src/features/collections/CategoryModal.tsx` | Creates a collection and selects its languages. |
 | `src/features/collections/EditCategoryModal.tsx` | Edits or removes an existing collection. |
@@ -129,14 +138,6 @@ environment files such as `.env`.
 | `src/components/Sidebar.tsx` | Authenticated side navigation and top application header. |
 | `src/components/NavItem.tsx` | Reusable navigation item used by the sidebar. |
 | `src/components/StatCard.tsx` | Reusable summary metric card used on the statistics screen. |
-| `src/components/CardsView.tsx` | Collection/card workspace with study and browse modes. |
-| `src/components/CardGrid.tsx` | Renders cards as a grid and supports card selection/actions. |
-| `src/components/CollectionStudy.tsx` | Study experience for cards in a selected collection. |
-| `src/components/ReviewView.tsx` | Spaced-repetition session for cards due for review. |
-| `src/components/AddCardModal.tsx` | Creates a flashcard or edits an existing one. |
-| `src/components/AiGeneratorModal.tsx` | Collects input for AI card generation from a prompt or word list. |
-| `src/components/GenerationResultModal.tsx` | Summarizes the result of AI card generation. |
-| `src/components/ConfirmationModal.tsx` | Reusable confirmation dialog for actions requiring user approval. |
 | `src/components/Modal.tsx` | Shared modal layout and backdrop behavior. |
 
 ### Hooks, services, utilities, and types
@@ -163,10 +164,11 @@ maintained module or public API.
 
 ### Current architecture
 
-`src/app/App.tsx` currently owns authentication state, authenticated view selection,
-and coordination between data hooks and page components. Newer page-level
-features are grouped under `features/`; existing UI and page code is still in
-`components/` and `pages/` and can move incrementally as those areas change.
+`src/app/App.tsx` currently owns authentication state, authenticated view
+selection, and coordination between data hooks and page components. Feature-
+specific UI is being moved under `features/`; shared primitives remain in
+`components/`, and the profile screen remains in `pages/` until its feature
+migration. Continue moving code incrementally as those areas change.
 `useFlashcards` loads and mutates card, collection, and review data through the
 domain services in `services/`. UI components receive data and callbacks from
 the app layer.
@@ -194,10 +196,11 @@ features to work.
 ## Architecture direction
 
 As the app grows, a **feature-based structure with shared UI and a small app
-layer** is a good fit. The first page-level features now live in
-`features/collections/`, `features/dashboard/`, `features/landing/`, and
-`features/statistics/`. Continue by moving domain-specific components and hooks
-alongside their feature pages (for example, cards and authentication). Keep
+layer** is a good fit. Page-level and card features now live in
+`features/collections/`, `features/dashboard/`, `features/landing/`,
+`features/statistics/`, and `features/cards/`. Continue by moving
+domain-specific components and hooks alongside their feature pages (for
+example, authentication and profile). Keep
 truly reusable primitives and layout elements in a shared UI area, and keep
 application composition, providers, and route configuration in an `app/`
 layer when that layer is introduced.
