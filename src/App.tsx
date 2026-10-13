@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { authService } from "@/services/authService";
 import { useFlashcards } from "@/hooks/useFlashcards";
 import { AuthPage } from "@/components/AuthPage";
+import { LandingPage } from "@/features/landing/LandingPage";
 import type {
   Card,
   CreateCardInput,
@@ -11,7 +12,9 @@ import type {
   UpdateCardInput,
 } from "@/types/flashcards";
 import { Sidebar, Header } from "@/components/Sidebar";
-import { Overview } from "@/components/Overview";
+import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { StatisticsPage } from "@/features/statistics/StatisticsPage";
+import { CollectionsPage } from "@/features/collections/CollectionsPage";
 import { CardsView } from "@/components/CardsView";
 import { ReviewView } from "@/components/ReviewView";
 import { AddCardModal } from "@/components/AddCardModal";
@@ -23,10 +26,18 @@ import { EditCategoryModal } from "./components/EditCategoryModal";
 import { ProfilePage } from "./pages/ProfilePage";
 import { userService } from "./services/userService";
 
-type View = "overview" | "cards" | "review" | "profile";
+type View =
+  | "overview"
+  | "statistics"
+  | "collections"
+  | "cards"
+  | "review"
+  | "profile";
+type AuthMode = "signin" | "signup";
 
 export default function App() {
   const [view, setView] = useState<View>("overview");
+  const [authMode, setAuthMode] = useState<AuthMode | null>(null);
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -204,7 +215,23 @@ export default function App() {
   const editingCategory = categories.find((c) => c.id === editingCategoryId);
 
   if (!authenticated) {
-    return <AuthPage onAuthenticated={handleAuthenticated} />;
+    if (authMode) {
+      return (
+        <AuthPage
+          key={authMode}
+          initialMode={authMode}
+          onAuthenticated={handleAuthenticated}
+          onBackToHome={() => setAuthMode(null)}
+        />
+      );
+    }
+
+    return (
+      <LandingPage
+        onGetStarted={() => setAuthMode("signup")}
+        onSignIn={() => setAuthMode("signin")}
+      />
+    );
   }
 
   return (
@@ -212,11 +239,9 @@ export default function App() {
       <Sidebar
         user={user}
         categories={categories}
-        cards={cards}
         categoryDueCounts={categoryDueCounts}
         view={view}
         activeCategory={activeCategory}
-        dueCount={dueCards.length}
         mobileNav={mobileNav}
         onNavigate={setView}
         onSelectCategory={handleCategoryChange}
@@ -234,12 +259,29 @@ export default function App() {
         />
         <div className="mx-auto max-w-[1320px] px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
           {view === "overview" && (
-            <Overview
-              cards={cards}
+            <DashboardPage
+              userName={user?.email?.split("@")[0] ?? ""}
+              categories={categories}
+              categoryDueCounts={categoryDueCounts}
               dueCount={dueCards.length}
-              stats={reviewStats ?? undefined}
               onReview={() => setView("review")}
-              onCards={() => setView("cards")}
+              onViewCollections={() => setView("collections")}
+              onSelectCategory={handleCategoryChange}
+              onAddCollection={() => setShowCategory(true)}
+            />
+          )}
+          {view === "statistics" && (
+            <StatisticsPage
+              dueCount={dueCards.length}
+              stats={reviewStats}
+            />
+          )}
+          {view === "collections" && (
+            <CollectionsPage
+              categories={categories}
+              categoryDueCounts={categoryDueCounts}
+              onAddCollection={() => setShowCategory(true)}
+              onSelectCollection={handleCategoryChange}
             />
           )}
           {view === "cards" && (

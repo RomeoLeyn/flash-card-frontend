@@ -2,24 +2,31 @@ import {
   BarChart3,
   BrainCircuit,
   Folder,
+  House,
   Menu,
   Plus,
   Search,
   Settings2,
 } from "lucide-react";
-import type { Card, Category } from "@/types/flashcards";
+import type { Category } from "@/types/flashcards";
 import { NavItem } from "./NavItem";
 
 type SidebarProps = {
   user: { id: string; email: string; createdAt: string } | null;
   categories: Category[];
-  cards: Card[];
   categoryDueCounts: Record<string, number>;
   view: string;
   activeCategory: string;
-  dueCount: number;
   mobileNav: boolean;
-  onNavigate: (view: "overview" | "cards" | "review" | "profile") => void;
+  onNavigate: (
+    view:
+      | "overview"
+      | "statistics"
+      | "collections"
+      | "cards"
+      | "review"
+      | "profile",
+  ) => void;
   onSelectCategory: (id: string) => void;
   onAddCategory: () => void;
   onCloseMobile: () => void;
@@ -28,11 +35,9 @@ type SidebarProps = {
 export function Sidebar({
   user,
   categories,
-  cards,
   categoryDueCounts,
   view,
   activeCategory,
-  dueCount,
   mobileNav,
   onNavigate,
   onSelectCategory,
@@ -56,11 +61,20 @@ export function Sidebar({
           <p className="eyebrow px-3">Workspace</p>
           <nav className="mt-3 space-y-1">
             <NavItem
-              icon={<BarChart3 size={17} />}
-              label="Overview"
+              icon={<House size={17} />}
+              label="Learning"
               active={view === "overview"}
               onClick={() => {
                 onNavigate("overview");
+                onCloseMobile();
+              }}
+            />
+            <NavItem
+              icon={<BarChart3 size={17} />}
+              label="Statistics"
+              active={view === "statistics"}
+              onClick={() => {
+                onNavigate("statistics");
                 onCloseMobile();
               }}
             />
@@ -153,10 +167,16 @@ export function Header({
           <span>›</span>
           <span className="font-medium text-[#17211d]">
             {view === "overview"
-              ? "Overview"
-              : view === "cards"
-                ? "My cards"
-                : "Review session"}
+              ? "Learning"
+              : view === "statistics"
+                ? "Statistics"
+                : view === "collections"
+                  ? "Collections"
+                  : view === "cards"
+                    ? "My cards"
+                    : view === "profile"
+                      ? "Profile"
+                      : "Review session"}
           </span>
         </div>
       </div>

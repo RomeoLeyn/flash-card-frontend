@@ -33,7 +33,10 @@ export function AddCardModal({
   const [explanation, setExplanation] = useState(card?.explanation ?? "");
   const [example, setExample] = useState(card?.example ?? "");
   const [categoryId, setCategoryId] = useState(
-    card?.categoryId || activeCategory || categories[0]?.id || "daily",
+    card?.categoryId ||
+      categories.find((category) => category.id === activeCategory)?.id ||
+      categories[0]?.id ||
+      "daily",
   );
 
   useEffect(() => {
@@ -44,7 +47,10 @@ export function AddCardModal({
     setExplanation(card.explanation ?? "");
     setExample(card.example ?? "");
     setCategoryId(
-      card.categoryId || activeCategory || categories[0]?.id || "daily",
+      card.categoryId ||
+        categories.find((category) => category.id === activeCategory)?.id ||
+        categories[0]?.id ||
+        "daily",
     );
   }, [activeCategory, card, categories]);
 
