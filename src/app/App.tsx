@@ -11,7 +11,7 @@ import type {
   ReviewQuality,
   UpdateCardInput,
 } from "@/types/flashcards";
-import { Sidebar, Header } from "@/components/Sidebar";
+import { Sidebar, Header } from "@/app/layout/Sidebar";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { StatisticsPage } from "@/features/statistics/StatisticsPage";
 import { CollectionsPage } from "@/features/collections/CollectionsPage";

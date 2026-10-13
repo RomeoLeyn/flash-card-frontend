@@ -6,7 +6,7 @@ import type {
   Category,
   CefrLevel,
 } from "@/types/flashcards";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/shared/ui/Modal";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 
 type AiGeneratorModalProps = {
