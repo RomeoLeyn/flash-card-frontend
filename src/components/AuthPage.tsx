@@ -2,11 +2,17 @@ import { useState } from "react";
 import { authService } from "@/services/authService";
 
 type AuthPageProps = {
+  initialMode: "signin" | "signup";
   onAuthenticated: () => void;
+  onBackToHome: () => void;
 };
 
-export function AuthPage({ onAuthenticated }: AuthPageProps) {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+export function AuthPage({
+  initialMode,
+  onAuthenticated,
+  onBackToHome,
+}: AuthPageProps) {
+  const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,16 +42,25 @@ export function AuthPage({ onAuthenticated }: AuthPageProps) {
   return (
     <div className="min-h-screen bg-[#f7f8f6] text-[#17211d]">
       <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-12 sm:px-8">
+        <button
+          type="button"
+          onClick={onBackToHome}
+          className="mb-5 self-start text-sm font-semibold text-[#718078] transition hover:text-[#438960]"
+        >
+          ← Back to home
+        </button>
         <div className="rounded-[32px] border border-[#e7eee6] bg-white p-8 shadow-lg shadow-[#d7e5df]/60">
           <div className="mb-8 text-center">
             <p className="text-sm uppercase tracking-[.2em] text-[#8d9a90]">
-              Welcome back
+              {mode === "signin" ? "Welcome back" : "Get started"}
             </p>
             <h1 className="mt-4 text-3xl font-bold tracking-[-.05em]">
               {mode === "signin" ? "Sign in" : "Create account"}
             </h1>
             <p className="mt-3 text-sm text-[#727f77]">
-              Use your email and password to access your flashcards.
+              {mode === "signin"
+                ? "Use your email and password to access your flashcards."
+                : "Create an account to start building your flashcard library."}
             </p>
           </div>
 

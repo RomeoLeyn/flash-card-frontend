@@ -1,24 +1,24 @@
 import { BookOpen, Clock3, Zap } from "lucide-react";
-import type { Card, ReviewStats } from "@/types/flashcards";
-import { StatCard } from "./StatCard";
+import type { ReviewStats } from "@/types/flashcards";
+import { StatCard } from "@/components/StatCard";
 
-type OverviewProps = {
-  cards: Card[];
+type StatisticsPageProps = {
   dueCount: number;
-  stats?: ReviewStats | null;
-  onReview: () => void;
-  onCards: () => void;
+  stats: ReviewStats | null;
 };
 
-export function Overview({
-  cards,
-  dueCount,
-  stats,
-  onReview,
-  onCards,
-}: OverviewProps) {
+export function StatisticsPage({ dueCount, stats }: StatisticsPageProps) {
   return (
-    <>
+    <div>
+      <div className="mb-8">
+        <p className="eyebrow">Your progress</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-[-.055em]">
+          Statistics<span className="text-[#55ad7d]">.</span>
+        </h1>
+        <p className="mt-2 text-sm text-[#7d8b82]">
+          A snapshot of your flashcard learning activity.
+        </p>
+      </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label="Due today"
@@ -42,7 +42,6 @@ export function Overview({
           tone="blue"
         />
       </div>
-      <div className="mt-10 grid gap-5 xl:grid-cols-[1.45fr_1fr]"></div>
-    </>
+    </div>
   );
 }
