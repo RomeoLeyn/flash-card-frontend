@@ -1,6 +1,6 @@
 import { Check, Copy, Sparkles } from "lucide-react";
 import type { AiGenerationResult } from "@/types/flashcards";
-import { Modal } from "./Modal";
+import { Modal } from "@/components/Modal";
 
 type GenerationResultModalProps = {
   result: AiGenerationResult;

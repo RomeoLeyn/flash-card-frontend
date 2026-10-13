@@ -6,7 +6,7 @@ import type {
   CreateCardInput,
   UpdateCardInput,
 } from "@/types/flashcards";
-import { Modal } from "./Modal";
+import { Modal } from "@/components/Modal";
 
 type AddCardModalProps = {
   categories: Category[];
