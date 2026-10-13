@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Save, Trash2 } from "lucide-react";
-import { Modal } from "./Modal";
+import { Modal } from "@/components/Modal";
 import type { Category } from "@/types/flashcards";
 import { LANGUAGE_OPTIONS, LanguageCode } from "@/common/constants/constants";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Modal } from "./Modal";
+import { Modal } from "@/components/Modal";
 
 type CategoryModalProps = {
   onClose: () => void;

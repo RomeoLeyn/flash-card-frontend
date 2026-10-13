@@ -62,7 +62,7 @@ src/
     App.tsx               Application state and authenticated view composition
   components/             Shared UI primitives and existing feature components
   features/
-    collections/          Collection list page
+    collections/          Collection list page and collection-specific dialogs
     dashboard/            Authenticated learning home
     landing/              Public marketing page
     statistics/           Learning statistics page
@@ -111,6 +111,8 @@ environment files such as `.env`.
 | `src/features/landing/LandingPage.tsx` | Public product landing page and entry points to sign-in or registration. |
 | `src/features/dashboard/DashboardPage.tsx` | Authenticated learning home, review prompt, quick action, and collection shortcuts. |
 | `src/features/collections/CollectionsPage.tsx` | Lists collections and allows the user to open or create one. |
+| `src/features/collections/CategoryModal.tsx` | Creates a collection and selects its languages. |
+| `src/features/collections/EditCategoryModal.tsx` | Edits or removes an existing collection. |
 | `src/features/statistics/StatisticsPage.tsx` | Displays review and card-count summary statistics. |
 
 ### Existing pages
@@ -134,8 +136,6 @@ environment files such as `.env`.
 | `src/components/AddCardModal.tsx` | Creates a flashcard or edits an existing one. |
 | `src/components/AiGeneratorModal.tsx` | Collects input for AI card generation from a prompt or word list. |
 | `src/components/GenerationResultModal.tsx` | Summarizes the result of AI card generation. |
-| `src/components/CategoryModal.tsx` | Creates a collection and selects its languages. |
-| `src/components/EditCategoryModal.tsx` | Edits or removes an existing collection. |
 | `src/components/ConfirmationModal.tsx` | Reusable confirmation dialog for actions requiring user approval. |
 | `src/components/Modal.tsx` | Shared modal layout and backdrop behavior. |
 

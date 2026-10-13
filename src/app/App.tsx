@@ -20,9 +20,9 @@ import { ReviewView } from "@/components/ReviewView";
 import { AddCardModal } from "@/components/AddCardModal";
 import { AiGeneratorModal } from "@/components/AiGeneratorModal";
 import { GenerationResultModal } from "@/components/GenerationResultModal";
-import { CategoryModal } from "@/components/CategoryModal";
+import { CategoryModal } from "@/features/collections/CategoryModal";
 import { LanguageCode } from "@/common/constants/constants";
-import { EditCategoryModal } from "@/components/EditCategoryModal";
+import { EditCategoryModal } from "@/features/collections/EditCategoryModal";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { userService } from "@/services/userService";
 
