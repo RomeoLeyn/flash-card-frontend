@@ -21,10 +21,10 @@ import { AddCardModal } from "@/components/AddCardModal";
 import { AiGeneratorModal } from "@/components/AiGeneratorModal";
 import { GenerationResultModal } from "@/components/GenerationResultModal";
 import { CategoryModal } from "@/components/CategoryModal";
-import { LanguageCode } from "./common/constants/constants";
-import { EditCategoryModal } from "./components/EditCategoryModal";
-import { ProfilePage } from "./pages/ProfilePage";
-import { userService } from "./services/userService";
+import { LanguageCode } from "@/common/constants/constants";
+import { EditCategoryModal } from "@/components/EditCategoryModal";
+import { ProfilePage } from "@/pages/ProfilePage";
+import { userService } from "@/services/userService";
 
 type View =
   | "overview"
@@ -123,7 +123,6 @@ export default function App() {
   }, [authenticated]);
 
   useEffect(() => {
-    // Reload browsed cards when sort order changes in browse mode
     if (browseMode && activeCategory) {
       void loadAllCardsByCategory(activeCategory);
     }
