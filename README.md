@@ -60,7 +60,7 @@ src/
   main.tsx                React entry point
   app/
     App.tsx               Application state and authenticated view composition
-  components/             Shared UI primitives and existing feature components
+    layout/               Authenticated sidebar, header, and navigation item
   features/
     auth/                 Sign-in and registration screens
     cards/                Card library, study/review flows, and card dialogs
@@ -69,6 +69,8 @@ src/
     landing/              Public marketing page
     profile/              Account profile and settings screen
     statistics/           Learning statistics page
+  shared/
+    ui/                   Reusable UI primitives shared across features
   hooks/                  Reusable React state and data hooks
   services/               HTTP API operations grouped by domain
   lib/                    HTTP client and small shared utilities
@@ -103,6 +105,8 @@ environment files such as `.env`.
 | --- | --- |
 | `src/main.tsx` | Creates the React root, loads global CSS, and renders the application. |
 | `src/app/App.tsx` | Coordinates authentication, shared data, navigation between screens, and app-level actions. |
+| `src/app/layout/Sidebar.tsx` | Authenticated application sidebar and top header. |
+| `src/app/layout/NavItem.tsx` | Navigation item used by the authenticated sidebar. |
 | `src/index.css` | Imports Tailwind and defines global design tokens and reusable visual styles. |
 | `src/api.ts` | Holds commented-out mock card examples; not currently used by the running app. |
 
@@ -126,15 +130,13 @@ environment files such as `.env`.
 | `src/features/collections/EditCategoryModal.tsx` | Edits or removes an existing collection. |
 | `src/features/profile/ProfilePage.tsx` | Account profile, password, and personal learning settings screen. |
 | `src/features/statistics/StatisticsPage.tsx` | Displays review and card-count summary statistics. |
+| `src/features/statistics/StatCard.tsx` | Displays a summary metric on the statistics page. |
 
 ### UI components
 
 | File | Purpose |
 | --- | --- |
-| `src/components/Sidebar.tsx` | Authenticated side navigation and top application header. |
-| `src/components/NavItem.tsx` | Reusable navigation item used by the sidebar. |
-| `src/components/StatCard.tsx` | Reusable summary metric card used on the statistics screen. |
-| `src/components/Modal.tsx` | Shared modal layout and backdrop behavior. |
+| `src/shared/ui/Modal.tsx` | Shared modal layout and backdrop behavior used by collection and card dialogs. |
 
 ### Hooks, services, utilities, and types
 
@@ -162,8 +164,9 @@ maintained module or public API.
 
 `src/app/App.tsx` currently owns authentication state, authenticated view
 selection, and coordination between data hooks and page components. Feature-
-specific UI is being moved under `features/`; shared primitives remain in
-`components/`. Continue moving code incrementally as those areas change.
+specific UI is grouped under `features/`, and genuinely reusable primitives
+live under `shared/ui/`. Authenticated shell components live under
+`app/layout/`.
 `useFlashcards` loads and mutates card, collection, and review data through the
 domain services in `services/`. UI components receive data and callbacks from
 the app layer.
@@ -195,7 +198,7 @@ layer** is a good fit. Page-level and card features now live in
 `features/collections/`, `features/dashboard/`, `features/landing/`,
 `features/statistics/`, and `features/cards/`. Continue by moving
 domain-specific components and hooks alongside their feature pages. Keep
-truly reusable primitives and layout elements in a shared UI area, and keep
+truly reusable primitives in the shared UI area, and keep
 application composition, providers, and route configuration in an `app/`
 layer when that layer is introduced.
 

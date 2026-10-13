@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/shared/ui/Modal";
 
 type ConfirmationModalProps = {
   open: boolean;

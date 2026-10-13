@@ -1,6 +1,6 @@
 import { BookOpen, Clock3, Zap } from "lucide-react";
 import type { ReviewStats } from "@/types/flashcards";
-import { StatCard } from "@/components/StatCard";
+import { StatCard } from "./StatCard";
 
 type StatisticsPageProps = {
   dueCount: number;
