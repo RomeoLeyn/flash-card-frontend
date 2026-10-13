@@ -135,8 +135,8 @@ export function AiGeneratorModal({
         >
           {(
             [
-              ["generate", "Згенерувати"],
-              ["from_list", "Мої слова"],
+              ["generate", "Generate"],
+              ["from_list", "My words"],
             ] as const
           ).map(([value, label]) => (
             <button
@@ -195,9 +195,8 @@ export function AiGeneratorModal({
                 value={level}
                 onChange={(e) =>
                   setLevel(
-                    CEFR_LEVELS.find(
-                      (option) => option === e.target.value,
-                    ) ?? "",
+                    CEFR_LEVELS.find((option) => option === e.target.value) ??
+                      "",
                   )
                 }
                 className="field-input"
