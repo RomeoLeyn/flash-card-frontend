@@ -57,8 +57,9 @@ variables: variables prefixed with `VITE_` are included in the browser build.
 
 ```text
 src/
-  App.tsx                 Application state and authenticated view composition
   main.tsx                React entry point
+  app/
+    App.tsx               Application state and authenticated view composition
   components/             Shared UI primitives and existing feature components
   features/
     collections/          Collection list page
@@ -99,7 +100,7 @@ environment files such as `.env`.
 | File | Purpose |
 | --- | --- |
 | `src/main.tsx` | Creates the React root, loads global CSS, and renders the application. |
-| `src/App.tsx` | Coordinates authentication, shared data, navigation between screens, and app-level actions. |
+| `src/app/App.tsx` | Coordinates authentication, shared data, navigation between screens, and app-level actions. |
 | `src/index.css` | Imports Tailwind and defines global design tokens and reusable visual styles. |
 | `src/api.ts` | Holds commented-out mock card examples; not currently used by the running app. |
 
@@ -162,7 +163,7 @@ maintained module or public API.
 
 ### Current architecture
 
-`App.tsx` currently owns authentication state, authenticated view selection,
+`src/app/App.tsx` currently owns authentication state, authenticated view selection,
 and coordination between data hooks and page components. Newer page-level
 features are grouped under `features/`; existing UI and page code is still in
 `components/` and `pages/` and can move incrementally as those areas change.
