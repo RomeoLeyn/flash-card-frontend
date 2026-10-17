@@ -12,6 +12,8 @@ generate cards with AI, and track basic learning activity.
 - Collection management and collection-based card study.
 - Manual flashcard creation, editing, deletion, searching, and browsing.
 - AI flashcard generation from a topic or a supplied word list.
+- AI explanations for selected words in example sentences, with optional
+  user-confirmed card creation.
 - Spaced-repetition review flow and basic review statistics.
 - User profile and account settings.
 

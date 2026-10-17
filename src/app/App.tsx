@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { authService } from "@/services/authService";
+import { cardService } from "@/services/cardService";
 import { useFlashcards } from "@/hooks/useFlashcards";
 import { AuthPage } from "@/features/auth/AuthPage";
 import { LandingPage } from "@/features/landing/LandingPage";
@@ -8,9 +9,11 @@ import type {
   CreateCardInput,
   AiGenerationRequest,
   AiGenerationResult,
+  AiWordExplanation,
   ReviewQuality,
   UpdateCardInput,
 } from "@/types/flashcards";
+import { ApiError } from "@/lib/httpClient";
 import { Sidebar, Header } from "@/app/layout/Sidebar";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { StatisticsPage } from "@/features/statistics/StatisticsPage";
@@ -20,6 +23,7 @@ import { ReviewView } from "@/features/cards/ReviewView";
 import { AddCardModal } from "@/features/cards/AddCardModal";
 import { AiGeneratorModal } from "@/features/cards/AiGeneratorModal";
 import { GenerationResultModal } from "@/features/cards/GenerationResultModal";
+import { ExplainWordModal } from "@/features/cards/ExplainWordModal";
 import { CategoryModal } from "@/features/collections/CategoryModal";
 import { LanguageCode } from "@/common/constants/constants";
 import { EditCategoryModal } from "@/features/collections/EditCategoryModal";
@@ -34,6 +38,13 @@ type View =
   | "review"
   | "profile";
 type AuthMode = "signin" | "signup";
+type WordExplanationContext = {
+  word: string;
+  sentence: string;
+  categoryId: string;
+  sourceLanguage: string;
+  targetLanguage: string;
+};
 
 export default function App() {
   const [view, setView] = useState<View>("overview");
@@ -53,6 +64,16 @@ export default function App() {
     authService.isAuthenticated(),
   );
   const [editingCard, setEditingCard] = useState<Card | null>(null);
+  const [wordExplanationContext, setWordExplanationContext] =
+    useState<WordExplanationContext | null>(null);
+  const [wordExplanation, setWordExplanation] =
+    useState<AiWordExplanation | null>(null);
+  const [wordExplanationLoading, setWordExplanationLoading] = useState(false);
+  const [wordExplanationError, setWordExplanationError] = useState<
+    string | null
+  >(null);
+  const [wordCardAdded, setWordCardAdded] = useState(false);
+  const explanationRequestId = useRef(0);
   const [user, setUser] = useState<{
     id: string;
     email: string;
@@ -101,10 +122,98 @@ export default function App() {
 
   const handleAuthenticated = () => setAuthenticated(true);
   const handleLogout = () => {
+    explanationRequestId.current += 1;
     authService.logout();
     setAuthenticated(false);
     setUser(null);
+    setWordExplanationContext(null);
+    setWordExplanation(null);
+    setWordExplanationLoading(false);
   };
+
+  const requestWordExplanation = async (
+    context: WordExplanationContext,
+  ) => {
+    const requestId = ++explanationRequestId.current;
+    setWordExplanationLoading(true);
+    setWordExplanationError(null);
+    setWordExplanation(null);
+
+    try {
+      const result = await cardService.explainWord({
+        word: context.word,
+        sentence: context.sentence,
+        sourceLanguage: context.sourceLanguage,
+        targetLanguage: context.targetLanguage,
+      });
+      if (requestId === explanationRequestId.current) {
+        setWordExplanation(result);
+      }
+    } catch (cause) {
+      if (requestId !== explanationRequestId.current) return;
+      if (cause instanceof ApiError && cause.status === 401) {
+        handleLogout();
+        return;
+      }
+
+      if (cause instanceof ApiError && cause.status === 400) {
+        setWordExplanationError(
+          "The selected word or sentence is invalid. Please select a word and try again.",
+        );
+      } else if (cause instanceof ApiError && cause.status === 429) {
+        setWordExplanationError(
+          "The AI request limit has been reached. Please try again later.",
+        );
+      } else {
+        setWordExplanationError(
+          "The AI explanation is temporarily unavailable. Please try again.",
+        );
+      }
+    } finally {
+      if (requestId === explanationRequestId.current) {
+        setWordExplanationLoading(false);
+      }
+    }
+  };
+
+  const explainSelectedWord = (word: string, sentence: string) => {
+    const category = categories.find(
+      (item) => item.id === activeCategory && item.id !== "all",
+    );
+    if (!category) return;
+
+    const context = {
+      word,
+      sentence,
+      categoryId: category.id,
+      sourceLanguage: category.sourceLanguage,
+      targetLanguage: category.targetLanguage,
+    };
+    setWordExplanationContext(context);
+    void requestWordExplanation(context);
+  };
+
+  const closeWordExplanation = () => {
+    explanationRequestId.current += 1;
+    setWordExplanationContext(null);
+    setWordExplanation(null);
+    setWordExplanationError(null);
+    setWordExplanationLoading(false);
+  };
+
+  const saveExplainedWord = async (
+    input: CreateCardInput,
+  ) => {
+    await createCard(input);
+    closeWordExplanation();
+    setWordCardAdded(true);
+  };
+
+  useEffect(() => {
+    if (!wordCardAdded) return;
+    const timeout = window.setTimeout(() => setWordCardAdded(false), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [wordCardAdded]);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -293,6 +402,7 @@ export default function App() {
               onAddAi={() => setShowAiGenerator(true)}
               onEditCategory={() => setEditingCategoryId(activeCategory)}
               onEditCard={setEditingCard}
+              onExplainWord={explainSelectedWord}
               onDeleteCard={deleteCard}
               onDeleteCards={bulkDeleteCards}
               onRate={reviewCard}
@@ -341,6 +451,36 @@ export default function App() {
           onAdd={addCard}
           onSave={saveCard}
         />
+      )}
+      {wordExplanationContext && (
+        <ExplainWordModal
+          explanation={wordExplanation}
+          loading={wordExplanationLoading}
+          error={wordExplanationError}
+          categoryId={wordExplanationContext.categoryId}
+          sourceLanguage={wordExplanationContext.sourceLanguage}
+          targetLanguage={wordExplanationContext.targetLanguage}
+          onClose={closeWordExplanation}
+          onRetry={() => void requestWordExplanation(wordExplanationContext)}
+          onSave={saveExplainedWord}
+          onUnauthorized={handleLogout}
+        />
+      )}
+      {wordCardAdded && (
+        <div
+          role="status"
+          className="fixed bottom-5 right-5 z-[60] rounded-xl bg-[#eaf5ec] px-4 py-3 text-sm font-semibold text-[#34744e] shadow-lg"
+        >
+          Word added to your dictionary.
+          <button
+            type="button"
+            onClick={() => setWordCardAdded(false)}
+            className="ml-3 text-[#508566] hover:text-[#26352d]"
+            aria-label="Dismiss confirmation"
+          >
+            ×
+          </button>
+        </div>
       )}
       {showAiGenerator && (
         <AiGeneratorModal

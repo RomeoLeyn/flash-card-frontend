@@ -243,9 +243,31 @@ button {
   background: #eef4ef;
   padding: 5px 9px;
   color: #71847a;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .04em;
+}
+
+.example-word-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  padding: 8px 2px;
+  color: inherit;
+  font: inherit;
+  line-height: 1.5;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  transition: background .2s, border-color .2s, color .2s;
+}
+
+.example-word-button:hover,
+.example-word-button:focus-visible {
+  border-color: #a9d2b4;
+  background: #eef8f0;
+  color: #34744e;
+  text-decoration-style: solid;
 }
 
 .word-icon {

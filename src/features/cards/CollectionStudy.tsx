@@ -15,6 +15,7 @@ type CollectionStudyProps = {
   onRate: (id: string, quality: ReviewQuality) => void;
   onAdd: () => void;
   onEditCard: (card: Card) => void;
+  onExplainWord: (word: string, sentence: string) => void;
 };
 
 export function CollectionStudy({
@@ -23,12 +24,14 @@ export function CollectionStudy({
   onRate,
   onAdd,
   onEditCard,
+  onExplainWord,
 }: CollectionStudyProps) {
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [finished, setFinished] = useState(false);
   const card = cards[index];
   const [explanationExpanded, setExplanationExpanded] = useState(false);
+  const [wordHintVisible, setWordHintVisible] = useState(true);
 
   const explanationRef = useRef<HTMLParagraphElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -321,9 +324,44 @@ export function CollectionStudy({
                     </div>
                   )}
                   {card.example && (
-                    <p className="mx-auto mt-3 max-w-md text-center text-sm italic leading-6 text-[#718278]">
-                      {card.example}
-                    </p>
+                    <>
+                      {wordHintVisible && (
+                        <p className="mx-auto mt-3 max-w-md text-center text-xs text-[#89968e]">
+                          Tap a word to learn more
+                        </p>
+                      )}
+                      <p
+                        onClick={(event) => event.stopPropagation()}
+                        className="mx-auto mt-1 max-w-md text-center text-sm italic leading-6 text-[#718278]"
+                      >
+                        {card.example
+                          .split(
+                            /([\p{L}\p{M}]+(?:['’\-][\p{L}\p{M}]+)*)/gu,
+                          )
+                          .map((part, partIndex) =>
+                            /^[\p{L}\p{M}]+(?:['’\-][\p{L}\p{M}]+)*$/u.test(
+                              part,
+                            ) ? (
+                              <button
+                                key={`${part}-${partIndex}`}
+                                type="button"
+                                aria-label={`Explain the word ${part}`}
+                                title={`Explain “${part}”`}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  setWordHintVisible(false);
+                                  onExplainWord(part, card.example!);
+                                }}
+                                className="example-word-button focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#34744e]"
+                              >
+                                {part}
+                              </button>
+                            ) : (
+                              part
+                            ),
+                          )}
+                      </p>
+                    </>
                   )}
                 </div>
               </div>
