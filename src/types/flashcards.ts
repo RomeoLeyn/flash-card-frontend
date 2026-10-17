@@ -80,3 +80,22 @@ export type AiGenerationResult = {
   createdCards: Card[];
   skippedWords: string[];
 };
+
+export type ExplainWordRequest = {
+  word: string;
+  sentence: string;
+  sourceLanguage: string;
+  targetLanguage: string;
+};
+
+export type AiWordExplanation = {
+  originalForm: string;
+  word: string;
+  sourceLanguage: string;
+  targetLanguage: string;
+  translation: string;
+  transcription: string;
+  explanation: string;
+  example: string;
+  detailedExplanation: string;
+};

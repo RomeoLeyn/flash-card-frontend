@@ -6,6 +6,7 @@ type ModalProps = {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  showCloseButton?: boolean;
 };
 
 export function Modal({
@@ -14,6 +15,7 @@ export function Modal({
   onClose,
   children,
   className = "",
+  showCloseButton = true,
 }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#17211d]/30 p-0 backdrop-blur-sm sm:items-center sm:p-5">
@@ -25,9 +27,16 @@ export function Modal({
             <h2 className="text-2xl font-bold tracking-[-.05em]">{title}</h2>
             <p className="mt-1 text-sm text-[#829087]">{subtitle}</p>
           </div>
-          <button className="icon-button" onClick={onClose}>
-            <X size={18} />
-          </button>
+          {showCloseButton && (
+            <button
+              type="button"
+              className="icon-button"
+              onClick={onClose}
+              aria-label="Close modal"
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
         {children}
       </div>

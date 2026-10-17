@@ -26,6 +26,7 @@ type CardsViewProps = {
   onAddAi: () => void;
   onEditCategory: () => void;
   onEditCard: (card: Card) => void;
+  onExplainWord: (word: string, sentence: string) => void;
   onDeleteCard: (id: string) => Promise<void> | void;
   onDeleteCards: (ids: string[]) => Promise<void>;
   onRate: (id: string, quality: ReviewQuality) => void;
@@ -46,6 +47,7 @@ export function CardsView({
   onAddAi,
   onEditCategory,
   onEditCard,
+  onExplainWord,
   onDeleteCard,
   onDeleteCards,
   onRate,
@@ -201,6 +203,7 @@ export function CardsView({
           onRate={onRate}
           onAdd={onAdd}
           onEditCard={onEditCard}
+          onExplainWord={onExplainWord}
         />
       )}
     </>

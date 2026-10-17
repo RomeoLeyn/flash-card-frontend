@@ -2,8 +2,10 @@ import { http, json, patchJson } from "@/lib/httpClient";
 import type {
   AiGenerationRequest,
   AiGenerationResult,
+  AiWordExplanation,
   Card,
   CreateCardInput,
+  ExplainWordRequest,
   UpdateCardInput,
 } from "@/types/flashcards";
 import { CardSortBy, SortOrder } from "@/common/constants/constants";
@@ -49,4 +51,6 @@ export const cardService = {
     }),
   generateFromAi: (request: AiGenerationRequest) =>
     http<AiGenerationResult>("/ai/generate", json(request)),
+  explainWord: (request: ExplainWordRequest) =>
+    http<AiWordExplanation>("/ai/explain", json(request)),
 };
