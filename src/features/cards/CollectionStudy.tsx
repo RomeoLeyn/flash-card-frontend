@@ -241,7 +241,7 @@ export function CollectionStudy({
                   </button>
                 </div>
               </div>
-              <div className="mt-12 flex min-h-[180px] flex-col justify-center">
+              <div className="flex min-h-[180px] flex-col justify-center">
                 <p className="text-center text-4xl font-bold tracking-[-.06em] sm:text-5xl">
                   {card.word}
                 </p>
@@ -250,16 +250,6 @@ export function CollectionStudy({
                     {card.transcription}
                   </p>
                 )}
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setFlipped(true);
-                  }}
-                  className="mx-auto mt-8 flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-[#508566] shadow-sm transition hover:bg-[#f4faf5]"
-                >
-                  <RotateCcw size={15} /> Reveal answer
-                </button>
               </div>
             </div>
             <div className="card-face card-back rounded-2xl p-6 sm:p-8">
