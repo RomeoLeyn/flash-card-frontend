@@ -206,13 +206,13 @@ export function useFlashcards(enabled = true) {
       setCards((current) =>
         current.some((existing) => existing.id === card.id)
           ? current
-          : [card, ...current],
+          : [...current, card],
       );
       if (browsedCategoryId === card.categoryId) {
         setBrowsedCards((current) =>
           current.some((existing) => existing.id === card.id)
             ? current
-            : [card, ...current],
+            : [...current, card],
         );
       }
       setCategoryDueCounts((current) => {
