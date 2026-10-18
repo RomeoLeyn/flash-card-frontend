@@ -26,7 +26,11 @@ export function CollectionStudy({
   onEditCard,
   onExplainWord,
 }: CollectionStudyProps) {
-  const [index, setIndex] = useState(0);
+  const [currentCardId, setCurrentCardId] = useState<string | null>(
+    cards[0]?.id ?? null,
+  );
+  const cardPosition = cards.findIndex((item) => item.id === currentCardId);
+  const index = Math.max(cardPosition, 0);
   const [flipped, setFlipped] = useState(false);
   const [finished, setFinished] = useState(false);
   const card = cards[index];
@@ -42,13 +46,19 @@ export function CollectionStudy({
 
   const pendingTimeout = useRef<number | null>(null);
 
+  useEffect(() => {
+    if (!currentCardId || !cards.some((item) => item.id === currentCardId)) {
+      setCurrentCardId(cards[0]?.id ?? null);
+    }
+  }, [cards, currentCardId]);
+
   const choose = (quality: ReviewQuality) => {
     onRate(card.id, quality);
     setFlipped(false);
     setExplanationExpanded(false);
     const timeout = window.setTimeout(() => {
       if (index + 1 < cards.length) {
-        setIndex((current) => current + 1);
+        setCurrentCardId(cards[index + 1].id);
       } else {
         setFinished(true);
       }
@@ -105,7 +115,7 @@ export function CollectionStudy({
         <div className="mt-6 flex justify-center gap-3">
           <button
             onClick={() => {
-              setIndex(0);
+              setCurrentCardId(cards[0]?.id ?? null);
               setFlipped(false);
               setFinished(false);
             }}
@@ -339,6 +349,7 @@ export function CollectionStudy({
                                 title={`Explain “${part}”`}
                                 onClick={(event) => {
                                   event.stopPropagation();
+                                  setCurrentCardId(card.id);
                                   setWordHintVisible(false);
                                   onExplainWord(part, card.example!);
                                 }}
