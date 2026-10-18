@@ -193,13 +193,52 @@ export function useFlashcards(enabled = true) {
     return category;
   };
 
-  const createCard = async (input: CreateCardInput) => {
+  const createCard = async (
+    input: CreateCardInput,
+    options: { refreshAfterCreate?: boolean } = {},
+  ) => {
     const card = normalizeCard(await cardService.create(input));
     if (!card.categoryId) {
       card.categoryId = input.categoryId;
     }
-    await load();
-    if (browsedCategoryId === card.categoryId) {
+    if (options.refreshAfterCreate === false) {
+      const due = isDue(card);
+      setCards((current) =>
+        current.some((existing) => existing.id === card.id)
+          ? current
+          : [card, ...current],
+      );
+      if (browsedCategoryId === card.categoryId) {
+        setBrowsedCards((current) =>
+          current.some((existing) => existing.id === card.id)
+            ? current
+            : [card, ...current],
+        );
+      }
+      setCategoryDueCounts((current) => {
+        if (!due) return current;
+        const next = { ...current };
+        if (typeof next.all === "number") next.all += 1;
+        if (typeof next[card.categoryId] === "number")
+          next[card.categoryId] += 1;
+        return next;
+      });
+      setReviewStats((current) =>
+        current
+          ? {
+              ...current,
+              total: (current.total ?? 0) + 1,
+              dueCount: (current.dueCount ?? 0) + (due ? 1 : 0),
+            }
+          : current,
+      );
+    } else {
+      await load();
+    }
+    if (
+      options.refreshAfterCreate !== false &&
+      browsedCategoryId === card.categoryId
+    ) {
       await loadAllCardsByCategory(card.categoryId);
     }
     return card;

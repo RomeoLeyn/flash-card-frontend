@@ -204,7 +204,7 @@ export default function App() {
   const saveExplainedWord = async (
     input: CreateCardInput,
   ) => {
-    await createCard(input);
+    await createCard(input, { refreshAfterCreate: false });
     closeWordExplanation();
     setWordCardAdded(true);
   };
