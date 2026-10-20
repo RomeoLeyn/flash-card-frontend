@@ -51,6 +51,7 @@ function isDue(card: Card): boolean {
 export function useFlashcards(enabled = true) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
+  const [collectionCards, setCollectionCards] = useState<Card[]>([]);
   const [categoryDueCounts, setCategoryDueCounts] = useState<
     Record<string, number>
   >({});
@@ -157,10 +158,16 @@ export function useFlashcards(enabled = true) {
       if (!enabled) return;
       setLoading(true);
       setError(null);
+      setCollectionCards([]);
 
       try {
-        const categoryCards = await cardService.listDue(categoryId);
-        setCards(normalizeCards(categoryCards));
+        const dueCategoryCards = await cardService.listDue(categoryId, 1000);
+        const allCategoryCards =
+          categoryId === "all"
+            ? []
+            : await cardService.getCardsByCategoryId(categoryId);
+        setCards(normalizeCards(dueCategoryCards));
+        setCollectionCards(normalizeCards(allCategoryCards));
       } catch (cause) {
         setError(
           cause instanceof Error
@@ -235,6 +242,11 @@ export function useFlashcards(enabled = true) {
     } else {
       await load();
     }
+    setCollectionCards((current) =>
+      current.some((existing) => existing.id === card.id)
+        ? current
+        : [...current, card],
+    );
     if (
       options.refreshAfterCreate !== false &&
       browsedCategoryId === card.categoryId
@@ -257,6 +269,9 @@ export function useFlashcards(enabled = true) {
       normalized.categoryId = input.categoryId ?? currentCard?.categoryId ?? "";
     }
     setCards((current) => current.map((c) => (c.id === id ? normalized : c)));
+    setCollectionCards((current) =>
+      current.map((card) => (card.id === id ? normalized : card)),
+    );
     setBrowsedCards((current) =>
       current.map((card) => (card.id === id ? normalized : card)),
     );
@@ -289,7 +304,9 @@ export function useFlashcards(enabled = true) {
   };
 
   const reviewCard = async (id: string, quality: ReviewQuality) => {
-    const currentCard = cards.find((card) => card.id === id);
+    const currentCard =
+      cards.find((card) => card.id === id) ??
+      collectionCards.find((card) => card.id === id);
     const updated = normalizeCard(await reviewService.submit(id, quality));
     if (!updated.categoryId && currentCard) {
       updated.categoryId = currentCard.categoryId;
@@ -298,6 +315,9 @@ export function useFlashcards(enabled = true) {
       current.map((card) => (card.id === id ? updated : card)),
     );
     setBrowsedCards((current) =>
+      current.map((card) => (card.id === id ? updated : card)),
+    );
+    setCollectionCards((current) =>
       current.map((card) => (card.id === id ? updated : card)),
     );
     if (currentCard && isDue(currentCard) && !isDue(updated)) {
@@ -333,6 +353,7 @@ export function useFlashcards(enabled = true) {
     const generatedCards = resp.createdCards ?? [];
     const normalizedGenerated = normalizeCards(generatedCards);
     setCards((current) => [...normalizedGenerated, ...current]);
+    setCollectionCards((current) => [...normalizedGenerated, ...current]);
     setBrowsedCards((current) =>
       current.length > 0 && current[0]?.categoryId === categoryId
         ? [...normalizedGenerated, ...current]
@@ -394,6 +415,9 @@ export function useFlashcards(enabled = true) {
     await categoryService.remove(id);
     setCategories((current) => current.filter((c) => c.id !== id));
     setCards((current) => current.filter((c) => c.categoryId !== id));
+    setCollectionCards((current) =>
+      current.filter((card) => card.categoryId !== id),
+    );
     setCategoryDueCounts((current) => {
       const next = { ...current };
       delete next[id];
@@ -404,9 +428,13 @@ export function useFlashcards(enabled = true) {
   const deleteCard = async (id: string) => {
     const deletedCard =
       cards.find((card) => card.id === id) ??
+      collectionCards.find((card) => card.id === id) ??
       browsedCards.find((card) => card.id === id);
     await cardService.remove(id);
     setCards((current) => current.filter((c) => c.id !== id));
+    setCollectionCards((current) =>
+      current.filter((card) => card.id !== id),
+    );
     setBrowsedCards((current) => current.filter((card) => card.id !== id));
     if (deletedCard) {
       setReviewStats((current) =>
@@ -439,6 +467,9 @@ export function useFlashcards(enabled = true) {
     if (uniqueIds.length === 0) return;
 
     await cardService.bulkRemove(uniqueIds);
+    setCollectionCards((current) =>
+      current.filter((card) => !uniqueIds.includes(card.id)),
+    );
     await Promise.all([
       load(),
       browsedCategoryId
@@ -458,6 +489,7 @@ export function useFlashcards(enabled = true) {
   return {
     categories,
     cards,
+    collectionCards,
     categoryDueCounts,
     reviewStats,
     loading,

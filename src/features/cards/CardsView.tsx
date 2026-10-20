@@ -19,6 +19,7 @@ import { CollectionStudy } from "./CollectionStudy";
 
 type CardsViewProps = {
   cards: Card[];
+  studyCards: Card[];
   categories: Category[];
   activeCategory: string;
   onCategory: (id: string) => void;
@@ -41,6 +42,7 @@ type CardsViewProps = {
 
 export function CardsView({
   cards,
+  studyCards,
   categories,
   activeCategory,
   onAdd,
@@ -65,6 +67,8 @@ export function CardsView({
     "Collection";
 
   const showGrid = !isStudyMode || browseMode;
+  const displayedCards =
+    isStudyMode && !browseMode ? studyCards : cards;
 
   return (
     <>
@@ -115,7 +119,7 @@ export function CardsView({
           </button>
         </div>
       </div>
-      {cards.length === 0 ? (
+      {displayedCards.length === 0 ? (
         <div className="panel flex flex-col items-center justify-center p-16 text-center">
           <Layers3 size={35} className="text-[#a8b9ad]" />
           <h3 className="mt-4 text-lg font-bold">No cards here yet</h3>
@@ -189,7 +193,7 @@ export function CardsView({
             </div>
           )}
           <CardGrid
-            cards={cards}
+            cards={displayedCards}
             onEdit={onEditCard}
             onDelete={onDeleteCard}
             onDeleteMany={onDeleteCards}
@@ -198,7 +202,9 @@ export function CardsView({
         </>
       ) : (
         <CollectionStudy
-          cards={cards}
+          key={activeCategory}
+          cards={displayedCards}
+          categoryId={activeCategory}
           categoryName={activeCategoryName}
           onRate={onRate}
           onAdd={onAdd}

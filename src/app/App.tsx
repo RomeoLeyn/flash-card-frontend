@@ -84,6 +84,7 @@ export default function App() {
   const {
     categories,
     cards,
+    collectionCards,
     categoryDueCounts,
     reviewStats,
     createCategory,
@@ -118,6 +119,15 @@ export default function App() {
           .includes(search.toLowerCase()),
       ),
     [sourceCards, search],
+  );
+  const visibleCollectionCards = useMemo(
+    () =>
+      collectionCards.filter((card) =>
+        `${card.word} ${card.translation}`
+          .toLowerCase()
+          .includes(search.toLowerCase()),
+      ),
+    [collectionCards, search],
   );
 
   const handleAuthenticated = () => setAuthenticated(true);
@@ -395,6 +405,7 @@ export default function App() {
           {view === "cards" && (
             <CardsView
               cards={visibleCards}
+              studyCards={visibleCollectionCards}
               categories={categories}
               activeCategory={activeCategory}
               onCategory={handleCategoryChange}

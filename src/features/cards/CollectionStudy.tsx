@@ -11,6 +11,7 @@ import type { Card, ReviewQuality } from "@/types/flashcards";
 
 type CollectionStudyProps = {
   cards: Card[];
+  categoryId: string;
   categoryName: string;
   onRate: (id: string, quality: ReviewQuality) => void;
   onAdd: () => void;
@@ -20,19 +21,24 @@ type CollectionStudyProps = {
 
 export function CollectionStudy({
   cards,
+  categoryId,
   categoryName,
   onRate,
   onAdd,
   onEditCard,
   onExplainWord,
 }: CollectionStudyProps) {
+  const completionKey = `flash:completed-collection:${categoryId}`;
+  const cardsSignature = JSON.stringify(cards.map((item) => item.id).sort());
   const [currentCardId, setCurrentCardId] = useState<string | null>(
     cards[0]?.id ?? null,
   );
   const cardPosition = cards.findIndex((item) => item.id === currentCardId);
   const index = Math.max(cardPosition, 0);
   const [flipped, setFlipped] = useState(false);
-  const [finished, setFinished] = useState(false);
+  const [finished, setFinished] = useState(
+    () => localStorage.getItem(completionKey) === cardsSignature,
+  );
   const card = cards[index];
   const [explanationExpanded, setExplanationExpanded] = useState(false);
   const [wordHintVisible, setWordHintVisible] = useState(true);
@@ -45,6 +51,28 @@ export function CollectionStudy({
   const [cardHeight, setCardHeight] = useState(280);
 
   const pendingTimeout = useRef<number | null>(null);
+  const initialCardsSignature = useRef(cardsSignature);
+
+  const restartStudy = () => {
+    if (pendingTimeout.current) {
+      clearTimeout(pendingTimeout.current);
+      pendingTimeout.current = null;
+    }
+    localStorage.removeItem(completionKey);
+    setCurrentCardId(cards[0]?.id ?? null);
+    setFlipped(false);
+    setExplanationExpanded(false);
+    setFinished(false);
+  };
+
+  useEffect(() => {
+    if (initialCardsSignature.current === cardsSignature) return;
+
+    initialCardsSignature.current = cardsSignature;
+    localStorage.removeItem(completionKey);
+    setCurrentCardId(cards[0]?.id ?? null);
+    setFinished(false);
+  }, [cards, cardsSignature, completionKey]);
 
   useEffect(() => {
     if (!currentCardId || !cards.some((item) => item.id === currentCardId)) {
@@ -56,8 +84,13 @@ export function CollectionStudy({
     onRate(card.id, quality);
     setFlipped(false);
     setExplanationExpanded(false);
+    const isLastCard = index + 1 >= cards.length;
+    if (isLastCard) {
+      localStorage.setItem(completionKey, cardsSignature);
+    }
+
     const timeout = window.setTimeout(() => {
-      if (index + 1 < cards.length) {
+      if (!isLastCard) {
         setCurrentCardId(cards[index + 1].id);
       } else {
         setFinished(true);
@@ -114,11 +147,7 @@ export function CollectionStudy({
         </p>
         <div className="mt-6 flex justify-center gap-3">
           <button
-            onClick={() => {
-              setCurrentCardId(cards[0]?.id ?? null);
-              setFlipped(false);
-              setFinished(false);
-            }}
+            onClick={restartStudy}
             className="secondary-button"
           >
             <RotateCcw size={16} /> Study again
@@ -140,12 +169,17 @@ export function CollectionStudy({
             Study mode<span className="text-[#55ad7d]">.</span>
           </h1>
         </div>
-        <div className="text-right">
-          <p className="text-2xl font-bold tracking-[-.06em]">
-            {index + 1}
-            <span className="text-[#a0aba3]"> / {cards.length}</span>
-          </p>
-          <p className="text-xs text-[#89968e]">cards in collection</p>
+        <div className="flex items-center gap-4">
+          <button onClick={restartStudy} className="secondary-button">
+            <RotateCcw size={16} /> Study again
+          </button>
+          <div className="text-right">
+            <p className="text-2xl font-bold tracking-[-.06em]">
+              {index + 1}
+              <span className="text-[#a0aba3]"> / {cards.length}</span>
+            </p>
+            <p className="text-xs text-[#89968e]">cards in collection</p>
+          </div>
         </div>
       </div>
       <div className="mb-5 h-1.5 overflow-hidden rounded-full bg-[#e4ebe5]">
