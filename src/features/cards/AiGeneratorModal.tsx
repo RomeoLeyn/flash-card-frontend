@@ -33,10 +33,12 @@ export function AiGeneratorModal({
   const [wordsInput, setWordsInput] = useState("");
   const [count, setCount] = useState("15");
   const [level, setLevel] = useState<CefrLevel | "">("");
-  const [categoryId, setCategoryId] = useState(
+  const categoryId =
     categories.some((c) => c.id === activeCategory)
       ? activeCategory!
-      : (categories[0]?.id ?? "daily"),
+      : (categories[0]?.id ?? "daily");
+  const selectedCategory = categories.find(
+    (category) => category.id === categoryId,
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -160,18 +162,9 @@ export function AiGeneratorModal({
         </div>
         <label className="field-label">
           Collection
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="field-input"
-            disabled={loading}
-          >
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <div className="field-input" aria-readonly="true">
+            {selectedCategory?.name ?? "No collection available"}
+          </div>
         </label>
         {mode === "generate" ? (
           <>
