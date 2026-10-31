@@ -4,7 +4,6 @@ import {
   ChevronDown,
   Pencil,
   Plus,
-  RotateCcw,
   Sparkles,
 } from "lucide-react";
 import type { Card, ReviewQuality } from "@/types/flashcards";
@@ -54,18 +53,6 @@ export function CollectionStudy({
 
   const pendingTimeout = useRef<number | null>(null);
   const initialCardsSignature = useRef(cardsSignature);
-
-  const restartStudy = () => {
-    if (pendingTimeout.current) {
-      clearTimeout(pendingTimeout.current);
-      pendingTimeout.current = null;
-    }
-    localStorage.removeItem(completionKey);
-    setCurrentCardId(cards[0]?.id ?? null);
-    setFlipped(false);
-    setExplanationExpanded(false);
-    setFinished(false);
-  };
 
   useEffect(() => {
     if (initialCardsSignature.current === cardsSignature) return;
@@ -159,13 +146,7 @@ export function CollectionStudy({
         <p className="mt-3 text-[#7d8b82]">
           You went through every card in {categoryName}.
         </p>
-        <div className="mt-6 flex justify-center gap-3">
-          <button
-            onClick={restartStudy}
-            className="secondary-button"
-          >
-            <RotateCcw size={16} /> Study again
-          </button>
+        <div className="mt-6 flex justify-center">
           <button onClick={onAdd} className="primary-button">
             <Plus size={17} /> Add card
           </button>
@@ -183,24 +164,10 @@ export function CollectionStudy({
             Study mode<span className="text-[#55ad7d]">.</span>
           </h1>
         </div>
-        <div className="flex items-center gap-4">
-          <button onClick={restartStudy} className="secondary-button">
-            <RotateCcw size={16} /> Study again
-          </button>
-          <div className="text-right">
-            <p className="text-2xl font-bold tracking-[-.06em]">
-              {index + 1}
-              <span className="text-[#a0aba3]"> / {cards.length}</span>
-            </p>
-            <p className="text-xs text-[#89968e]">cards in collection</p>
-          </div>
+        <div className="text-right">
+          <p className="text-2xl font-bold tracking-[-.06em]">{cards.length}</p>
+          <p className="text-xs text-[#89968e]">cards in collection</p>
         </div>
-      </div>
-      <div className="mb-5 h-1.5 overflow-hidden rounded-full bg-[#e4ebe5]">
-        <div
-          className="h-full rounded-full bg-[#55ad7d] transition-all"
-          style={{ width: `${((index + 1) / cards.length) * 100}%` }}
-        />
       </div>
 
       {/*
