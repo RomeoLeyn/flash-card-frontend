@@ -13,7 +13,7 @@ type CollectionStudyProps = {
   cards: Card[];
   categoryId: string;
   categoryName: string;
-  onRate: (id: string, quality: ReviewQuality) => void;
+  onRate: (id: string, quality: ReviewQuality) => Promise<void>;
   onAdd: () => void;
   onEditCard: (card: Card) => void;
   onExplainWord: (word: string, sentence: string) => void;
@@ -39,6 +39,8 @@ export function CollectionStudy({
   const [finished, setFinished] = useState(
     () => localStorage.getItem(completionKey) === cardsSignature,
   );
+  const [submitting, setSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
   const card = cards[index];
   const [explanationExpanded, setExplanationExpanded] = useState(false);
   const [wordHintVisible, setWordHintVisible] = useState(true);
@@ -80,24 +82,36 @@ export function CollectionStudy({
     }
   }, [cards, currentCardId]);
 
-  const choose = (quality: ReviewQuality) => {
-    onRate(card.id, quality);
-    setFlipped(false);
-    setExplanationExpanded(false);
-    const isLastCard = index + 1 >= cards.length;
-    if (isLastCard) {
-      localStorage.setItem(completionKey, cardsSignature);
-    }
+  const choose = async (quality: ReviewQuality) => {
+    if (submitting) return;
 
-    const timeout = window.setTimeout(() => {
-      if (!isLastCard) {
-        setCurrentCardId(cards[index + 1].id);
-      } else {
-        setFinished(true);
+    setSubmitting(true);
+    setReviewError(null);
+    try {
+      await onRate(card.id, quality);
+      setFlipped(false);
+      setExplanationExpanded(false);
+      const isLastCard = index + 1 >= cards.length;
+      if (isLastCard) {
+        localStorage.setItem(completionKey, cardsSignature);
       }
-    }, 600);
 
-    pendingTimeout.current = timeout;
+      const timeout = window.setTimeout(() => {
+        if (!isLastCard) {
+          setCurrentCardId(cards[index + 1].id);
+        } else {
+          setFinished(true);
+        }
+      }, 600);
+
+      pendingTimeout.current = timeout;
+    } catch (cause) {
+      setReviewError(
+        cause instanceof Error ? cause.message : "Failed to submit review",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -405,33 +419,49 @@ export function CollectionStudy({
         </div>
       </div>
       <div
-        className={`mt-10 grid grid-cols-3 gap-3 transition-opacity duration-300 ${flipped ? "opacity-100" : "pointer-events-none opacity-40"}`}
+        className={`mt-10 grid grid-cols-2 gap-3 transition-opacity duration-300 sm:grid-cols-4 ${flipped ? "opacity-100" : "pointer-events-none opacity-40"}`}
       >
         <button
-          disabled={!flipped}
-          onClick={() => choose("bad")}
-          className="quality-button quality-bad"
+          disabled={!flipped || submitting}
+          onClick={() => void choose("again")}
+          className="quality-button quality-again"
         >
-          <span>Bad</span>
-          <small>tomorrow</small>
+          <span>Again</span>
+          <small>Didn't remember</small>
         </button>
         <button
-          disabled={!flipped}
-          onClick={() => choose("good")}
+          disabled={!flipped || submitting}
+          onClick={() => void choose("hard")}
+          className="quality-button quality-hard"
+        >
+          <span>Hard</span>
+          <small>With difficulty</small>
+        </button>
+        <button
+          disabled={!flipped || submitting}
+          onClick={() => void choose("good")}
           className="quality-button quality-good"
         >
           <span>Good</span>
-          <small>in 3 days</small>
+          <small>Remembered</small>
         </button>
         <button
-          disabled={!flipped}
-          onClick={() => choose("perfect")}
-          className="quality-button quality-perfect"
+          disabled={!flipped || submitting}
+          onClick={() => void choose("easy")}
+          className="quality-button quality-easy"
         >
-          <span>Perfect</span>
-          <small>in 10 days</small>
+          <span>Easy</span>
+          <small>Remembered easily</small>
         </button>
       </div>
+      {reviewError && (
+        <p
+          role="alert"
+          className="mt-3 rounded-lg border border-[#e4b8b8] bg-[#fff3f3] p-3 text-center text-sm text-[#c7563a]"
+        >
+          {reviewError}
+        </p>
+      )}
       <p className="mt-5 text-center text-xs text-[#9aa59e]">
         Flip the card to reveal the answer, then rate your recall
       </p>
