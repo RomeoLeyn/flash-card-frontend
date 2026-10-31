@@ -30,7 +30,7 @@ type CardsViewProps = {
   onExplainWord: (word: string, sentence: string) => void;
   onDeleteCard: (id: string) => Promise<void> | void;
   onDeleteCards: (ids: string[]) => Promise<void>;
-  onRate: (id: string, quality: ReviewQuality) => void;
+  onRate: (id: string, quality: ReviewQuality) => Promise<void>;
   browseMode: boolean;
   browseLoading: boolean;
   onBrowseAll: () => void;
@@ -67,8 +67,7 @@ export function CardsView({
     "Collection";
 
   const showGrid = !isStudyMode || browseMode;
-  const displayedCards =
-    isStudyMode && !browseMode ? studyCards : cards;
+  const displayedCards = cards;
 
   return (
     <>
@@ -122,9 +121,15 @@ export function CardsView({
       {displayedCards.length === 0 ? (
         <div className="panel flex flex-col items-center justify-center p-16 text-center">
           <Layers3 size={35} className="text-[#a8b9ad]" />
-          <h3 className="mt-4 text-lg font-bold">No cards here yet</h3>
+          <h3 className="mt-4 text-lg font-bold">
+            {isStudyMode && !browseMode && studyCards.length > 0
+              ? "Nothing due right now"
+              : "No cards here yet"}
+          </h3>
           <p className="mt-2 text-sm text-[#829087]">
-            Add your first card to start building this collection.
+            {isStudyMode && !browseMode && studyCards.length > 0
+              ? "All cards in this collection are scheduled for later. Come back when they are due, or browse all cards."
+              : "Add your first card to start building this collection."}
           </p>
         </div>
       ) : showGrid ? (

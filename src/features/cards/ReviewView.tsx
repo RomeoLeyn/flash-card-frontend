@@ -4,7 +4,7 @@ import type { Card, ReviewQuality } from "@/types/flashcards";
 
 type ReviewViewProps = {
   cards: Card[];
-  onComplete: (id: string, quality: ReviewQuality) => void;
+  onComplete: (id: string, quality: ReviewQuality) => Promise<void>;
   onEditCard: (card: Card) => void;
 };
 
@@ -13,9 +13,12 @@ export function ReviewView({
   onComplete,
   onEditCard,
 }: ReviewViewProps) {
+  const [sessionCards] = useState(cards);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
-  const card = cards[index];
+  const [submitting, setSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const card = sessionCards[index];
 
   if (!card) {
     return (
@@ -33,10 +36,22 @@ export function ReviewView({
     );
   }
 
-  const choose = (quality: ReviewQuality) => {
-    onComplete(card.id, quality);
-    setRevealed(false);
-    setIndex((current) => current + 1);
+  const choose = async (quality: ReviewQuality) => {
+    if (submitting) return;
+
+    setSubmitting(true);
+    setReviewError(null);
+    try {
+      await onComplete(card.id, quality);
+      setRevealed(false);
+      setIndex((current) => current + 1);
+    } catch (cause) {
+      setReviewError(
+        cause instanceof Error ? cause.message : "Failed to submit review",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -51,7 +66,7 @@ export function ReviewView({
         <div className="text-right">
           <p className="text-2xl font-bold tracking-[-.06em]">
             {index + 1}
-            <span className="text-[#a0aba3]"> / {cards.length}</span>
+            <span className="text-[#a0aba3]"> / {sessionCards.length}</span>
           </p>
           <p className="text-xs text-[#89968e]">cards remaining</p>
         </div>
@@ -59,7 +74,7 @@ export function ReviewView({
       <div className="mb-5 h-1.5 overflow-hidden rounded-full bg-[#e4ebe5]">
         <div
           className="h-full rounded-full bg-[#55ad7d] transition-all"
-          style={{ width: `${((index + 1) / cards.length) * 100}%` }}
+          style={{ width: `${((index + 1) / sessionCards.length) * 100}%` }}
         />
       </div>
       <div className={`review-card ${revealed ? "review-card-revealed" : ""}`}>
@@ -106,32 +121,48 @@ export function ReviewView({
           </button>
         </div>
       </div>
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <button
-          disabled={!revealed}
-          onClick={() => choose("bad")}
-          className="quality-button quality-bad"
+          disabled={!revealed || submitting}
+          onClick={() => void choose("again")}
+          className="quality-button quality-again"
         >
-          <span>Hard</span>
-          <small>tomorrow</small>
+          <span>Again</span>
+          <small>Didn't remember</small>
         </button>
         <button
-          disabled={!revealed}
-          onClick={() => choose("good")}
+          disabled={!revealed || submitting}
+          onClick={() => void choose("hard")}
+          className="quality-button quality-hard"
+        >
+          <span>Hard</span>
+          <small>With difficulty</small>
+        </button>
+        <button
+          disabled={!revealed || submitting}
+          onClick={() => void choose("good")}
           className="quality-button quality-good"
         >
           <span>Good</span>
-          <small>in 3 days</small>
+          <small>Remembered</small>
         </button>
         <button
-          disabled={!revealed}
-          onClick={() => choose("perfect")}
-          className="quality-button quality-perfect"
+          disabled={!revealed || submitting}
+          onClick={() => void choose("easy")}
+          className="quality-button quality-easy"
         >
-          <span>Perfect</span>
-          <small>in 10 days</small>
+          <span>Easy</span>
+          <small>Remembered easily</small>
         </button>
       </div>
+      {reviewError && (
+        <p
+          role="alert"
+          className="mt-3 rounded-lg border border-[#e4b8b8] bg-[#fff3f3] p-3 text-center text-sm text-[#c7563a]"
+        >
+          {reviewError}
+        </p>
+      )}
       <p className="mt-5 text-center text-xs text-[#9aa59e]">
         Rate how well you remembered this card
       </p>

@@ -312,7 +312,9 @@ export function useFlashcards(enabled = true) {
       updated.categoryId = currentCard.categoryId;
     }
     setCards((current) =>
-      current.map((card) => (card.id === id ? updated : card)),
+      isDue(updated)
+        ? current.map((card) => (card.id === id ? updated : card))
+        : current.filter((card) => card.id !== id),
     );
     setBrowsedCards((current) =>
       current.map((card) => (card.id === id ? updated : card)),

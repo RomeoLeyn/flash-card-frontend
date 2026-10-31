@@ -336,7 +336,13 @@ button {
   opacity: .4;
 }
 
-.quality-bad:not(:disabled):hover {
+.quality-again:not(:disabled):hover {
+  border-color: #e4a4a4;
+  background: #fff3f3;
+  color: #b94a48;
+}
+
+.quality-hard:not(:disabled):hover {
   border-color: #e4b894;
   background: #fff8f1;
   color: #b7733a;
@@ -348,7 +354,7 @@ button {
   color: #4a9468;
 }
 
-.quality-perfect:not(:disabled):hover {
+.quality-easy:not(:disabled):hover {
   border-color: #89c4c4;
   background: #f0fbfb;
   color: #4a8e8d;

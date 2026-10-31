@@ -14,7 +14,8 @@ generate cards with AI, and track basic learning activity.
 - AI flashcard generation from a topic or a supplied word list.
 - AI explanations for selected words in example sentences, with optional
   user-confirmed card creation.
-- Spaced-repetition review flow and basic review statistics.
+- FSRS-backed spaced-repetition review flow with Again, Hard, Good, and Easy
+  ratings; review scheduling is handled by the backend.
 - User profile and account settings.
 
 ## Tech stack

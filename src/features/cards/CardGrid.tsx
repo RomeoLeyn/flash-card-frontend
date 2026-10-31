@@ -175,13 +175,8 @@ export function CardGrid({
                       Tap to reveal translation
                     </p>
                   </div>
-                  <div className="mt-8 flex items-center justify-between border-t border-[#edf0ed] pt-4 text-xs text-[#91a098]">
-                    <span>{card.repetitions} reviews</span>
-                    <span className={card.isLeech ? "text-[#c7813c]" : ""}>
-                      {card.isLeech
-                        ? "Needs attention"
-                        : relativeDate(card.nextReviewDate)}
-                    </span>
+                  <div className="mt-8 flex items-center justify-end border-t border-[#edf0ed] pt-4 text-xs text-[#91a098]">
+                    <span>Next review: {relativeDate(card.nextReviewDate)}</span>
                   </div>
                 </div>
                 <div className="card-face card-back rounded-2xl p-6">

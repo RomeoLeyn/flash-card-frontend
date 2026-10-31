@@ -8,12 +8,8 @@ export type Card = {
   explanation: string;
   example: string | null;
   createdByAi: boolean;
-  easeFactor: number;
-  repetitions: number;
-  interval: number;
   nextReviewDate: string | null;
   lastReviewedAt: string | null;
-  isLeech: boolean;
   categoryId: string;
   createdAt?: string;
   updatedAt?: string;
@@ -27,7 +23,7 @@ export type Category = {
   createdAt: string;
   updatedAt?: string;
 };
-export type ReviewQuality = "bad" | "good" | "perfect";
+export type ReviewQuality = "again" | "hard" | "good" | "easy";
 export type AuthResponse = {
   accessToken: string;
   user?: { id: string; email: string };
